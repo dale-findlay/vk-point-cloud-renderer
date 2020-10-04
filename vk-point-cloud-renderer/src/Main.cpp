@@ -40,7 +40,7 @@ int main()
 
 #ifdef WIN32
     system("PAUSE");
-#elseif __APPLE__
+#elif __APPLE__
      system( "read -n 1 -s -p \"Press any key to continue...\"" );
 #endif
     

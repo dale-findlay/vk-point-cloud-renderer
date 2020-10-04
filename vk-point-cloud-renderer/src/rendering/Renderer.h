@@ -73,26 +73,54 @@ namespace vkpc {
 		uint32_t GetImageCount(const SwapChainSupportDetails& swapChainSupport);
 
 		//Image Views
-		bool CreateImageViews();
-		void DestroyImageViews();
+		bool CreateSwapChainImageViews();
+		void DestroySwapChainImageViews();
+
+		//Render Passes
+		bool CreateRenderPass();
+		void DestroyRenderPass();
 
 		//Graphics Pipeline
 		bool CreateGraphicsPipeline();
 		void DestroyGraphicsPipeline();
+		bool CreateGraphicsPipelineLayout();
+		void DestroyGraphicsPipelineLayout();
+
+		//Framebuffers
+		bool CreateFramebuffers();
+		void DestroyFramebuffers();
+
+		//Command infrastructure
+		bool CreateCommandPool();
+		void DestroyCommandPool();
+		bool CreateCommandBuffers();
+		void DestroyCommandBuffers();
+
+		//Command Buffer Population.
+		bool BuildCommandBuffer();
+
+		//Sync Primitives
+		bool CreateSyncPrimitives();
+		void DestroySyncPrimitives();
 
 		//Shader Modules
-		bool CreateShaderModule(std::vector<char> source);
-		void DestroyShaderModule();
+		VkShaderModule CreateShaderModule(std::vector<char> source);
+		void DestroyShaderModule(VkShaderModule module);
 
 		//Helper Functions
 		static std::vector<char> ReadShaderFile(const std::string& filename);
 
+		void DrawFrame();
 
 	private:
 		bool enableValidationLayers = true;
 		std::vector<const char*> m_ValidationLayers;
 		std::vector<const char*> m_Extensions;
 		std::vector<const char*> m_DeviceExtensions;
+
+		bool framebufferResized = false;
+		uint32_t maxInFlightFrames = 2;
+		size_t currentFrame = 0;
 
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
@@ -110,15 +138,30 @@ namespace vkpc {
 		//Swapchain
 		VkSwapchainKHR swapChain;
 		vkpc::SwapChainSupportDetails swapChainSupport;
+		std::vector<VkImage> swapChainImages;
 		VkSurfaceFormatKHR surfaceFormat;
 		VkPresentModeKHR presentMode;
 		VkExtent2D extent;
-		std::vector<VkImage> swapChainImages;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
-
-		//Image Views
 		std::vector<VkImageView> swapChainImageViews;
+		std::vector<VkFramebuffer> swapChainFramebuffers;
 
+		//Render Pass
+		VkRenderPass renderPass;
+
+		//Graphics pipeline passes.
+		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
+
+		//Cmd pool.
+		VkCommandPool commandPool;
+		std::vector<VkCommandBuffer> commandBuffers;
+
+		//Synchronization Primitives.
+		std::vector<VkSemaphore> imageAvailableSemaphores;
+		std::vector<VkSemaphore> renderFinishedSemaphores;
+		std::vector<VkFence> inFlightFences;
+		std::vector<VkFence> imagesInFlight;
 	};
 }

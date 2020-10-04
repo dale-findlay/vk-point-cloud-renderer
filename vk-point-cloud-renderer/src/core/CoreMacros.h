@@ -22,7 +22,7 @@
 extern bool __HandleError(const char* file, int line);
 
 #define VKPC_ASSERT(condition) if(!condition && __HandleError(__VKPC_FILE, __LINE__)) { __debugbreak(); }
-#elseif __APPLE__
+#elif __APPLE__
 #define VKPC_ASSERT(condition) if(!condition) { \
 	printf("Assertion failed in file: %s at line: %d", __VKPC_FILE, __LINE__);\	
 	__builtin_trap(); \
