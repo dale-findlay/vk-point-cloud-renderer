@@ -7,9 +7,17 @@
 #include <sstream>
 #endif
 
+#include <cstdio>
+#include <cstdlib>
+
+#ifdef WIN32
 #define VKPC_MEMORY_ALIGNMENT 16
 #define VKPC_ALLOC(size)	_aligned_malloc(size, VKPC_MEMORY_ALIGNMENT)
 #define VKPC_FREE(block)	_aligned_free(block);
+#else
+#define VKPC_ALLOC(size)    malloc(size);
+#define VKPC_FREE(block)    free(block);
+#endif
 
 #ifdef WIN32
 #include <windows.h>
@@ -69,10 +77,10 @@ void vkpc::MemoryAllocator::HeapFree(void* ptr)
 
 void vkpc::MemoryAllocator::HeapFreeDebug(void* ptr, const char* file, int line)
 {
-	uint8_t* block = ((uint8_t*)ptr) - sizeof(size_t);
-	size_t size = *(size_t*)block;
-
 #ifdef _DEBUG
+    uint8_t* block = ((uint8_t*)ptr) - sizeof(size_t);
+    size_t size = *(size_t*)block;
+    
 	std::stringstream ss;
 	ss << "Freeing " << size << " bytes in file: " << file << " at line " << line << std::endl;
 	OutputDebugString(ss.str().c_str());
@@ -83,7 +91,7 @@ void vkpc::MemoryAllocator::HeapFreeDebug(void* ptr, const char* file, int line)
 
 bool vkpc::MemoryAllocator::IsMemoryAllocated()
 {
-	std::cout << "Outstanding allocations " << m_NumAllocations << " totaling: " << m_AllocationTotal << " bytes" << std::endl;
+	//std::cout << "Outstanding allocations " << m_NumAllocations << " totaling: " << m_AllocationTotal << " bytes" << std::endl;
 
 	return m_AllocationTotal != 0;
 }

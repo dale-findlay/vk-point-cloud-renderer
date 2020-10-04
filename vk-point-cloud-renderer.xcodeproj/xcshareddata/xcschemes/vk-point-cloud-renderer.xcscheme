@@ -54,12 +54,12 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "VK_ICD_FILENAMES"
-            value = "/Users/dalefindlay/VulkanSDK/share/vulkan/icd.d/MoltenVK_icd.json"
+            value = "/usr/local/VulkanSDK/share/vulkan/icd.d/MoltenVK_icd.json"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "VK_LAYER_PATH"
-            value = "/Users/dalefindlay/VulkanSDK/share/vulkan/explicit_layer.d"
+            value = "/usr/local/VulkanSDK/share/vulkan/explicit_layer.d"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

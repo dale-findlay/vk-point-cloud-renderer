@@ -1,6 +1,7 @@
 #pragma once
 #include "memory/MemoryAllocator.h"
 
+#ifdef WIN32
 #define vkpcnew new(__FILE__, __LINE__)
 #define vkpcdelete delete
 
@@ -46,3 +47,7 @@ inline void operator delete[](void* block, const char* file, int line)
 }
 
 #pragma warning(default : 4595)
+#else
+#define vkpcnew new
+#define vkpcdelete delete
+#endif

@@ -8,7 +8,7 @@ vkpc::platform::GLFWWindow::~GLFWWindow()
 
 bool vkpc::platform::GLFWWindow::Init()
 {
-	if (glfwInit() != GLFW_TRUE)
+    if(glfwInit() != GLFW_TRUE)
 	{
 		const char* description;
 		int code = glfwGetError(&description);

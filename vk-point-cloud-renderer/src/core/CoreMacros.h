@@ -1,5 +1,9 @@
 #pragma once
+
+#ifdef WIN32
 #include <intrin.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -14,15 +18,19 @@
 
 #define __VKPC_FILE __FILE__
 
-#if WIN32
+#ifdef WIN32
 extern bool __HandleError(const char* file, int line);
 
 #define VKPC_ASSERT(condition) if(!condition && __HandleError(__VKPC_FILE, __LINE__)) { __debugbreak(); }
-#else
+#elseif __APPLE__
 #define VKPC_ASSERT(condition) if(!condition) { \
 	printf("Assertion failed in file: %s at line: %d", __VKPC_FILE, __LINE__);\	
-	__debugbreak(); \
+	__builtin_trap(); \
 	}
+#else
+#define VKPC_ASSERT(condition) if(!condition) { \
+    printf("Assertion failed in file: %s at line: %d", __VKPC_FILE, __LINE__);\
+    }
 #endif
 	
 

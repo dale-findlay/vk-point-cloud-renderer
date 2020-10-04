@@ -11,8 +11,8 @@
 #include <optional>
 #include <set>
 
-#include "application\Application.h"
-#include "platform\PlatformWindow.h"
+#include "application/Application.h"
+#include "platform/PlatformWindow.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -511,7 +511,7 @@ VkExtent2D vkpc::Renderer::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
 	else {
 		vkpc::platform::PlatformWindow* window = m_Application->GetSubSystem<vkpc::platform::PlatformWindow>();
 
-		VkExtent2D actualExtent = { window->GetWindowWidth(), window->GetWindowHeight()};
+		VkExtent2D actualExtent = { (uint32_t)window->GetWindowWidth(), (uint32_t)window->GetWindowHeight()};
 
 		actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
 		actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));

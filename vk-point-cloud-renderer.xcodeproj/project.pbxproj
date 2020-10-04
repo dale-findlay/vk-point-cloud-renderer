@@ -7,14 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5DD3D5B92528BA5E0069C99C /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5DD3D5B82528BA5E0069C99C /* Main.cpp */; };
-		5DD3D5BA2528BD7F0069C99C /* libvulkan.1.2.148.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DE31D332528B5B600D9CC07 /* libvulkan.1.2.148.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		5DD3D5BE2528BD7F0069C99C /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DD3D5BC2528BD7F0069C99C /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		5DD3D5C12528BDDE0069C99C /* libvulkan.1.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5DD3D5BF2528BDDE0069C99C /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5DD3D5C22528BDDE0069C99C /* libvulkan.1.2.148.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5DD3D5C02528BDDE0069C99C /* libvulkan.1.2.148.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5DD3D5C42528BDEF0069C99C /* libglfw.3.4.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5DD3D5C32528BDEF0069C99C /* libglfw.3.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		5DD3D5C62528BEDD0069C99C /* shaders in Copy Files */ = {isa = PBXBuildFile; fileRef = 5DD3D5C52528BE900069C99C /* shaders */; };
-		5DE31D322528B55800D9CC07 /* libglfw.3.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DE31D312528B55800D9CC07 /* libglfw.3.4.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		5D0D67142529620D003B884A /* shaders in Copy Files */ = {isa = PBXBuildFile; fileRef = 5DD3D5C52528BE900069C99C /* shaders */; };
+		5D0D674725296559003B884A /* CoreMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D673125296559003B884A /* CoreMacros.cpp */; };
+		5D0D674825296559003B884A /* SubSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D673525296559003B884A /* SubSystem.cpp */; };
+		5D0D674925296559003B884A /* MemoryAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D673A25296559003B884A /* MemoryAllocator.cpp */; };
+		5D0D674A25296559003B884A /* Win32Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D673E25296559003B884A /* Win32Window.cpp */; };
+		5D0D674B25296559003B884A /* PlatformWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D673F25296559003B884A /* PlatformWindow.cpp */; };
+		5D0D674C25296559003B884A /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D674225296559003B884A /* Renderer.cpp */; };
+		5D0D674D25296559003B884A /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D674525296559003B884A /* Application.cpp */; };
+		5D0D674E25296559003B884A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D0D674625296559003B884A /* Main.cpp */; };
+		5D0D675025296A0D003B884A /* libglfw.3.4.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5D0D674F25296A0D003B884A /* libglfw.3.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5D0D675125296A12003B884A /* libglfw.3.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0D674F25296A0D003B884A /* libglfw.3.4.dylib */; };
+		5D0D675325296A1C003B884A /* libvulkan.1.2.148.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5D0D675225296A1C003B884A /* libvulkan.1.2.148.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5D0D675525296A22003B884A /* libvulkan.1.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = 5D0D675425296A22003B884A /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		5D0D675625296A2D003B884A /* libvulkan.1.2.148.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0D675225296A1C003B884A /* libvulkan.1.2.148.dylib */; };
+		5D0D675725296A2D003B884A /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0D675425296A22003B884A /* libvulkan.1.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,10 +31,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				5DD3D5C12528BDDE0069C99C /* libvulkan.1.dylib in Copy Files */,
-				5DD3D5C22528BDDE0069C99C /* libvulkan.1.2.148.dylib in Copy Files */,
-				5DD3D5C42528BDEF0069C99C /* libglfw.3.4.dylib in Copy Files */,
-				5DD3D5C62528BEDD0069C99C /* shaders in Copy Files */,
+				5D0D67142529620D003B884A /* shaders in Copy Files */,
+				5D0D675025296A0D003B884A /* libglfw.3.4.dylib in Copy Files */,
+				5D0D675325296A1C003B884A /* libvulkan.1.2.148.dylib in Copy Files */,
+				5D0D675525296A22003B884A /* libvulkan.1.dylib in Copy Files */,
 			);
 			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,15 +42,32 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		5DD3D5B82528BA5E0069C99C /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = "vk-point-cloud-renderer/src/Main.cpp"; sourceTree = "<group>"; };
+		5D0D6712252961CA003B884A /* libvulkan.1.2.148.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.2.148.dylib; path = ../../../VulkanSDK/lib/libvulkan.1.2.148.dylib; sourceTree = "<group>"; };
+		5D0D673125296559003B884A /* CoreMacros.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CoreMacros.cpp; sourceTree = "<group>"; };
+		5D0D673225296559003B884A /* CoreMinimal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreMinimal.h; sourceTree = "<group>"; };
+		5D0D673325296559003B884A /* SubSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubSystem.h; sourceTree = "<group>"; };
+		5D0D673425296559003B884A /* CoreMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreMacros.h; sourceTree = "<group>"; };
+		5D0D673525296559003B884A /* SubSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubSystem.cpp; sourceTree = "<group>"; };
+		5D0D673625296559003B884A /* Memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
+		5D0D673725296559003B884A /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		5D0D673925296559003B884A /* MemoryAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryAllocator.h; sourceTree = "<group>"; };
+		5D0D673A25296559003B884A /* MemoryAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryAllocator.cpp; sourceTree = "<group>"; };
+		5D0D673C25296559003B884A /* Win32Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Win32Window.h; sourceTree = "<group>"; };
+		5D0D673D25296559003B884A /* PlatformWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformWindow.h; sourceTree = "<group>"; };
+		5D0D673E25296559003B884A /* Win32Window.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Win32Window.cpp; sourceTree = "<group>"; };
+		5D0D673F25296559003B884A /* PlatformWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformWindow.cpp; sourceTree = "<group>"; };
+		5D0D674125296559003B884A /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Renderer.h; sourceTree = "<group>"; };
+		5D0D674225296559003B884A /* Renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Renderer.cpp; sourceTree = "<group>"; };
+		5D0D674425296559003B884A /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		5D0D674525296559003B884A /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		5D0D674625296559003B884A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
+		5D0D674F25296A0D003B884A /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../usr/local/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
+		5D0D675225296A1C003B884A /* libvulkan.1.2.148.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.2.148.dylib; path = ../../../../../usr/local/VulkanSDK/lib/libvulkan.1.2.148.dylib; sourceTree = "<group>"; };
+		5D0D675425296A22003B884A /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../../../usr/local/VulkanSDK/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
 		5DD3D5BB2528BD7F0069C99C /* libvulkan.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.dylib; path = ../../../../../VulkanSDK/lib/libvulkan.dylib; sourceTree = "<group>"; };
 		5DD3D5BC2528BD7F0069C99C /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../../../VulkanSDK/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
-		5DD3D5BF2528BDDE0069C99C /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../../../VulkanSDK/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
-		5DD3D5C02528BDDE0069C99C /* libvulkan.1.2.148.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.2.148.dylib; path = ../../../../../VulkanSDK/lib/libvulkan.1.2.148.dylib; sourceTree = "<group>"; };
-		5DD3D5C32528BDEF0069C99C /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../../../usr/local/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
 		5DD3D5C52528BE900069C99C /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
 		5DE31D252528B02400D9CC07 /* vk-point-cloud-renderer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "vk-point-cloud-renderer"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5DE31D2F2528B0C900D9CC07 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; path = src; sourceTree = "<group>"; };
 		5DE31D312528B55800D9CC07 /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = "../../../../../../../usr/local/Cellar/glfw/HEAD-40d150c/lib/libglfw.3.4.dylib"; sourceTree = "<group>"; };
 		5DE31D332528B5B600D9CC07 /* libvulkan.1.2.148.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.2.148.dylib; path = ../../../../../VulkanSDK/lib/libvulkan.1.2.148.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -53,22 +77,86 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5DE31D322528B55800D9CC07 /* libglfw.3.4.dylib in Frameworks */,
-				5DD3D5BE2528BD7F0069C99C /* libvulkan.1.dylib in Frameworks */,
-				5DD3D5BA2528BD7F0069C99C /* libvulkan.1.2.148.dylib in Frameworks */,
+				5D0D675125296A12003B884A /* libglfw.3.4.dylib in Frameworks */,
+				5D0D675625296A2D003B884A /* libvulkan.1.2.148.dylib in Frameworks */,
+				5D0D675725296A2D003B884A /* libvulkan.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5D0D672F25296559003B884A /* src */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D673025296559003B884A /* core */,
+				5D0D673825296559003B884A /* memory */,
+				5D0D673B25296559003B884A /* platform */,
+				5D0D674025296559003B884A /* rendering */,
+				5D0D674325296559003B884A /* application */,
+				5D0D674625296559003B884A /* Main.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		5D0D673025296559003B884A /* core */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D673125296559003B884A /* CoreMacros.cpp */,
+				5D0D673225296559003B884A /* CoreMinimal.h */,
+				5D0D673325296559003B884A /* SubSystem.h */,
+				5D0D673425296559003B884A /* CoreMacros.h */,
+				5D0D673525296559003B884A /* SubSystem.cpp */,
+				5D0D673625296559003B884A /* Memory.h */,
+				5D0D673725296559003B884A /* Logger.h */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		5D0D673825296559003B884A /* memory */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D673925296559003B884A /* MemoryAllocator.h */,
+				5D0D673A25296559003B884A /* MemoryAllocator.cpp */,
+			);
+			path = memory;
+			sourceTree = "<group>";
+		};
+		5D0D673B25296559003B884A /* platform */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D673C25296559003B884A /* Win32Window.h */,
+				5D0D673D25296559003B884A /* PlatformWindow.h */,
+				5D0D673E25296559003B884A /* Win32Window.cpp */,
+				5D0D673F25296559003B884A /* PlatformWindow.cpp */,
+			);
+			path = platform;
+			sourceTree = "<group>";
+		};
+		5D0D674025296559003B884A /* rendering */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D674125296559003B884A /* Renderer.h */,
+				5D0D674225296559003B884A /* Renderer.cpp */,
+			);
+			path = rendering;
+			sourceTree = "<group>";
+		};
+		5D0D674325296559003B884A /* application */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D674425296559003B884A /* Application.h */,
+				5D0D674525296559003B884A /* Application.cpp */,
+			);
+			path = application;
+			sourceTree = "<group>";
+		};
 		5DE31D1C2528B02300D9CC07 = {
 			isa = PBXGroup;
 			children = (
-				5DD3D5C32528BDEF0069C99C /* libglfw.3.4.dylib */,
-				5DD3D5C02528BDDE0069C99C /* libvulkan.1.2.148.dylib */,
-				5DD3D5BF2528BDDE0069C99C /* libvulkan.1.dylib */,
-				5DD3D5B82528BA5E0069C99C /* Main.cpp */,
+				5D0D675425296A22003B884A /* libvulkan.1.dylib */,
+				5D0D675225296A1C003B884A /* libvulkan.1.2.148.dylib */,
+				5D0D674F25296A0D003B884A /* libglfw.3.4.dylib */,
 				5DE31D272528B02400D9CC07 /* vk-point-cloud-renderer */,
 				5DE31D262528B02400D9CC07 /* Products */,
 				5DE31D302528B55800D9CC07 /* Frameworks */,
@@ -86,8 +174,8 @@
 		5DE31D272528B02400D9CC07 /* vk-point-cloud-renderer */ = {
 			isa = PBXGroup;
 			children = (
+				5D0D672F25296559003B884A /* src */,
 				5DD3D5C52528BE900069C99C /* shaders */,
-				5DE31D2F2528B0C900D9CC07 /* src */,
 			);
 			path = "vk-point-cloud-renderer";
 			sourceTree = "<group>";
@@ -95,6 +183,7 @@
 		5DE31D302528B55800D9CC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5D0D6712252961CA003B884A /* libvulkan.1.2.148.dylib */,
 				5DD3D5BC2528BD7F0069C99C /* libvulkan.1.dylib */,
 				5DD3D5BB2528BD7F0069C99C /* libvulkan.dylib */,
 				5DE31D332528B5B600D9CC07 /* libvulkan.1.2.148.dylib */,
@@ -160,7 +249,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5DD3D5B92528BA5E0069C99C /* Main.cpp in Sources */,
+				5D0D674C25296559003B884A /* Renderer.cpp in Sources */,
+				5D0D674725296559003B884A /* CoreMacros.cpp in Sources */,
+				5D0D674825296559003B884A /* SubSystem.cpp in Sources */,
+				5D0D674925296559003B884A /* MemoryAllocator.cpp in Sources */,
+				5D0D674A25296559003B884A /* Win32Window.cpp in Sources */,
+				5D0D674B25296559003B884A /* PlatformWindow.cpp in Sources */,
+				5D0D674E25296559003B884A /* Main.cpp in Sources */,
+				5D0D674D25296559003B884A /* Application.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,10 +378,15 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_STYLE = Automatic;
 				FRAMEWORK_SEARCH_PATHS = "";
-				HEADER_SEARCH_PATHS = /usr/local/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"$(SRCROOT)/vk-point-cloud-renderer/src",
+					/usr/local/VulkanSDK/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					"\"$(SRCROOT)/../../../../../VulkanSDK/lib\"",
+					"/usr/local/Cellar/glfw/HEAD-40d150c/lib",
+					/usr/local/VulkanSDK/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -299,7 +400,8 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					"\"$(SRCROOT)/../../../../../VulkanSDK/lib\"",
+					"/usr/local/Cellar/glfw/HEAD-40d150c/lib",
+					/usr/local/VulkanSDK/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
