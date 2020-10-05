@@ -4,7 +4,8 @@
 #include "core/SubSystem.h"
 #include "platform/PlatformWindow.h"
 
-#include "rendering/Renderer.h"
+//#include "rendering/Renderer.h"
+#include "rendering/VulkanRenderer.h"
 #include "platform/Win32Window.h"
 
 #define DECLARE_INIT_SUBSYSTEM(SubsystemType, varName) \
@@ -33,7 +34,9 @@ bool vkpc::Application::Initialize()
 	m_PlatformWindow = (platform::PlatformWindow*)window;
 
 	//Declare renderer last because Update() draws the frame.
-	DECLARE_INIT_SUBSYSTEM(Renderer, renderer);
+	//DECLARE_INIT_SUBSYSTEM(Renderer, renderer);
+	
+	DECLARE_INIT_SUBSYSTEM(VulkanRenderer, renderer);
 
 	VKPC_LOG_INFO("Finished Initializing Application");
 

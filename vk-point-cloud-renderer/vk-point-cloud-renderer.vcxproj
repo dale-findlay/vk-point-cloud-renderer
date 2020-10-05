@@ -25,20 +25,46 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\memory\MemoryAllocator.cpp" />
     <ClCompile Include="src\platform\PlatformWindow.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanCommandBuffer.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanCommandPool.cpp" />
+    <ClCompile Include="src\platform\vulkan\core\VulkanDeviceResource.cpp" />
+    <ClCompile Include="src\platform\vulkan\core\VulkanSubObject.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanBuffer.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanContext.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanDevice.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanSurface.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanSwapChain.cpp" />
     <ClCompile Include="src\platform\Win32Window.cpp" />
     <ClCompile Include="src\rendering\Renderer.cpp" />
+    <ClCompile Include="src\rendering\VulkanRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\application\Application.h" />
     <ClInclude Include="src\core\CoreMacros.h" />
     <ClInclude Include="src\core\CoreMinimal.h" />
+    <ClInclude Include="src\core\CoreTypes.h" />
+    <ClInclude Include="src\core\GameObject.h" />
     <ClInclude Include="src\core\Logger.h" />
     <ClInclude Include="src\core\Memory.h" />
     <ClInclude Include="src\core\SubSystem.h" />
     <ClInclude Include="src\memory\MemoryAllocator.h" />
     <ClInclude Include="src\platform\PlatformWindow.h" />
+    <ClInclude Include="src\platform\vulkan\core\QueueFamilyIndices.h" />
+    <ClInclude Include="src\platform\vulkan\core\SwapChainSupportDetails.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanCommandBuffer.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanCommandPool.h" />
+    <ClInclude Include="src\platform\vulkan\core\VulkanDeviceResource.h" />
+    <ClInclude Include="src\platform\vulkan\core\VulkanSubObject.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanBuffer.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanDevice.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanContext.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanSurface.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanSwapChain.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanTexture.h" />
     <ClInclude Include="src\platform\Win32Window.h" />
+    <ClInclude Include="src\rendering\core\Vertex.h" />
     <ClInclude Include="src\rendering\Renderer.h" />
+    <ClInclude Include="src\rendering\VulkanRenderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -93,28 +119,28 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(SolutionDir)dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(SolutionDir)dependencies\glfw3\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(SolutionDir)dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(SolutionDir)dependencies\glfw3\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(SolutionDir)dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(SolutionDir)dependencies\glfw3\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src\;$(VULKAN_SDK)\Include\;$(SolutionDir)dependencies\glfw3\include;$(SolutionDir)dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(SolutionDir)dependencies\glfw3\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\Intermediate\</IntDir>
