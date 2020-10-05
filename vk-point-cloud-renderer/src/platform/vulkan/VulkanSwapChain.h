@@ -17,6 +17,7 @@ namespace vkpc {
 		~VulkanSwapChain();
 
 		VkSwapchainKHR GetSwapChain();
+		VkFormat GetSwapChainImageFormat();
 
 	private:
 		bool CreateSwapChain();

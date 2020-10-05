@@ -11,7 +11,7 @@ namespace vkpc {
 		std::optional<uint32> computeFamily;
 
 		bool isComplete(bool includePresent) {
-			bool v = graphicsFamily.has_value() && presentFamily.has_value();
+			bool v = graphicsFamily.has_value() && computeFamily.has_value();
 
 			if (includePresent)
 			{

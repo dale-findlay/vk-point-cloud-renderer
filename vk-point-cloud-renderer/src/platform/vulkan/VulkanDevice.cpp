@@ -38,6 +38,11 @@ vkpc::QueueFamilyIndices vkpc::VulkanDevice::GetQueueFamilyIndices() const
 	return m_QueueFamilyIndices;
 }
 
+VkFormat vkpc::VulkanDevice::GetDepthFormat()
+{
+	return m_DepthFormat;
+}
+
 vkpc::VulkanBuffer* vkpc::VulkanDevice::CreateBuffer(size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode, VkBufferCreateFlags createFlags)
 {
 	VulkanBuffer* newBuffer = new VulkanBuffer(this, size, usageFlags, sharingMode, createFlags);
@@ -55,39 +60,104 @@ vkpc::VulkanCommandPool* vkpc::VulkanDevice::CreateCommandPool(uint32 queueFamil
 	return newCommandPool;
 }
 
+vkpc::VulkanRenderPass* vkpc::VulkanDevice::CreateRenderPass()
+{
+	VulkanRenderPass* newRenderPass = new VulkanRenderPass(this);
+	m_RenderPasses.push_back(newRenderPass);
+	return newRenderPass;
+}
+
 vkpc::QueueFamilyIndices vkpc::VulkanDevice::FindQueueFamilyIndices(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
 {
 	QueueFamilyIndices indices;
+	std::vector<VkQueueFamilyProperties> queueFamilyProperties;
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
-	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+	queueFamilyProperties.resize(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
 
-	int i = 0;
-	for (const auto& queueFamily : queueFamilies) {
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			indices.graphicsFamily = i;
+	VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+
+	auto FindQueueIndex = [=](VkQueueFlagBits queueFlags, std::vector<VkQueueFamilyProperties> queueFamilyProperties) {
+		
+		int32 lastOkayIndex = -1;
+
+		for (int32 i = 0; i < static_cast<int32>(queueFamilyProperties.size()); i++)
+		{
+			//found a match!
+			if ((queueFamilyProperties[i].queueFlags & queueFlags))
+			{
+				//if we're looking for compute, check for a dedicated one.
+				if (queueFlags == VK_QUEUE_COMPUTE_BIT)
+				{
+					//We found a dedicated one.
+					if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0)
+					{
+						return i;
+					}
+					
+					//If it's NOT a dedicate one then keep track it.
+					lastOkayIndex = i;
+				}
+				else
+				{
+					return i;
+				}
+			}
 		}
 
-		bool includePresent = surface != VK_NULL_HANDLE;
+		//By this stage we mustn't have found exactly what we were looking for, so settle for the last good index.
+		return lastOkayIndex;
+	};
 
-		if (includePresent)
+	//Find graphics queue family.
+	if (requestedQueueTypes & VK_QUEUE_GRAPHICS_BIT)
+	{
+		int index = FindQueueIndex(VK_QUEUE_GRAPHICS_BIT, queueFamilyProperties);
+
+		if (index != -1)
 		{
+			indices.graphicsFamily = (uint32)index;	
+		}
+	}
+
+	//Find compute queue family.
+	if (requestedQueueTypes & VK_QUEUE_COMPUTE_BIT)
+	{
+		int index = FindQueueIndex(VK_QUEUE_COMPUTE_BIT, queueFamilyProperties);
+
+		if (index != -1)
+		{
+			indices.computeFamily = (uint32)index;
+		}
+		else
+		{
+			//just in-case, if none were found, use the graphics one - if we got to this point our algorithm must be shit, its supposed to handle that.
+			indices.computeFamily = indices.graphicsFamily;
+		}
+	}
+
+	if (surface != VK_NULL_HANDLE)
+	{
+		int i = 0;
+		for (const auto& queueFamily : queueFamilyProperties) {
+
 			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
 
 			if (presentSupport) {
 				indices.presentFamily = i;
 			}
+
+			i++;
 		}
 
-		if (indices.isComplete(includePresent)) {
-			break;
+		if (!indices.presentFamily.has_value())
+		{
+			VKPC_LOG_ERROR("Could not find supported present family!");
 		}
-
-		i++;
 	}
 
 	return indices;
@@ -121,8 +191,34 @@ vkpc::SwapChainSupportDetails vkpc::VulkanDevice::FindSwapChainSupportDetails(Vk
 void vkpc::VulkanDevice::CacheQueueFamilyIndicies()
 {
 	VulkanSurface* surface = VulkanContext::GetSurface();
-
 	m_QueueFamilyIndices = FindQueueFamilyIndices(GetPhysicalDevice(), surface->GetVkSurface());
+}
+
+bool vkpc::VulkanDevice::GetValidDepthFormat()
+{
+	std::vector<VkFormat> depthFormats = {
+			VK_FORMAT_D32_SFLOAT_S8_UINT,
+			VK_FORMAT_D32_SFLOAT,
+			VK_FORMAT_D24_UNORM_S8_UINT,
+			VK_FORMAT_D16_UNORM_S8_UINT,
+			VK_FORMAT_D16_UNORM
+	};
+
+	bool foundFormat = false;
+
+	for (auto& format : depthFormats)
+	{
+		VkFormatProperties formatProps;
+		vkGetPhysicalDeviceFormatProperties(GetPhysicalDevice(), format, &formatProps);
+		// Format must support depth stencil attachment for optimal tiling
+		if (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			m_DepthFormat = format;	
+			foundFormat = true;
+		}
+	}
+	
+	return foundFormat;
 }
 
 bool vkpc::VulkanDevice::CreateLogicalDevice()
@@ -132,14 +228,18 @@ bool vkpc::VulkanDevice::CreateLogicalDevice()
 		m_QueueFamilyIndices.graphicsFamily.value()
 	};
 
+	//only create a compute queue when there is a dedicated queue for compute - otherwise it will just be the same queue as graphics.
+	if (m_QueueFamilyIndices.graphicsFamily.value() != m_QueueFamilyIndices.computeFamily.value())
+	{
+		uniqueQueueFamilies.emplace(m_QueueFamilyIndices.computeFamily.value());
+	}
+
 	//Check if there is a valid surface for this context, we need to make sure that we include our present QF.
 	VulkanSurface* surface = VulkanContext::GetSurface();
 	if (surface)
 	{
 		uniqueQueueFamilies.emplace(m_QueueFamilyIndices.presentFamily.value());
 	}
-
-	//TODO add compute as well!
 
 	float queuePriority = 1.0f;
 	for (uint32_t queueFamily : uniqueQueueFamilies) {
@@ -208,7 +308,7 @@ void vkpc::VulkanDevice::SelectComputeQueue()
 }
 
 void vkpc::VulkanDevice::CleanUpBuffers()
-{	
+{
 	for (auto& buffer : m_Buffers)
 	{
 		delete buffer;

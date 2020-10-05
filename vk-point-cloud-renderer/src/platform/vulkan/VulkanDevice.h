@@ -11,6 +11,8 @@
 #include "platform/vulkan/VulkanBuffer.h"
 #include "platform/vulkan/VulkanCommandPool.h"
 #include "platform/vulkan/VulkanCommandBuffer.h"
+#include "platform/vulkan/VulkanGraphicsPipeline.h"
+#include "platform/vulkan/VulkanRenderPass.h"
 
 namespace vkpc {
 
@@ -24,9 +26,14 @@ namespace vkpc {
 		VkDevice GetLogicalDevice() const;
 		QueueFamilyIndices GetQueueFamilyIndices() const;
 
+		VkFormat GetDepthFormat();
+
 		VulkanBuffer* CreateBuffer(size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE, VkBufferCreateFlags createFlags = -1);
 		VulkanCommandPool* CreateCommandPool(uint32 queueFamilyIndex);
-
+		VulkanRenderPass* CreateRenderPass();
+		//VulkanFrameBuffer* CreateFrameBuffer();
+		//VulkanGraphicsPipeline* CreateGraphicsPipeline();
+		
 		//VulkanSemaphore* CreateSemaphore();
 		//VulkanFence* CreateFence(VkFenceCreateFlags createFlags);
 
@@ -43,7 +50,8 @@ namespace vkpc {
 
 	private:
 		void CacheQueueFamilyIndicies();
-
+		bool GetValidDepthFormat();
+		
 		bool CreateLogicalDevice();
 		void DestroyLogicalDevice();
 
@@ -62,6 +70,10 @@ namespace vkpc {
 		VkQueue m_PresentQueue;
 		VkQueue m_ComputeQueue;		
 
+		VkFormat m_DepthFormat;
+
+
+		std::vector<VulkanRenderPass*> m_RenderPasses;
 		std::vector<VulkanBuffer*> m_Buffers;
 		std::vector<VulkanCommandPool*> m_CommandPools;
 

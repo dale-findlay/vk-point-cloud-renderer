@@ -41,6 +41,11 @@ VkSwapchainKHR vkpc::VulkanSwapChain::GetSwapChain()
 	return m_SwapChain;
 }
 
+VkFormat vkpc::VulkanSwapChain::GetSwapChainImageFormat()
+{
+	return m_SwapChainImageFormat;
+}
+
 bool vkpc::VulkanSwapChain::CreateSwapChain()
 {
 	m_SurfaceFormat = ChooseSwapSurfaceFormat(m_CachedSwapChainSupport.formats);
