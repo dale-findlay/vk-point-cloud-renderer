@@ -82,7 +82,7 @@ void vkpc::VulkanGraphicsPipeline::SetMultisampleStage(VkSampleCountFlagBits ras
 	m_MultisampleStateCreateInfo.flags = flags;
 }
 
-void vkpc::VulkanGraphicsPipeline::SetDynamicStage(const std::vector<VkDynamicState>& pDynamicStates, VkPipelineDynamicStateCreateFlags flags = 0)
+void vkpc::VulkanGraphicsPipeline::SetDynamicStage(const std::vector<VkDynamicState>& pDynamicStates, VkPipelineDynamicStateCreateFlags flags)
 {
 	m_DynamicStateCreateInfo = {};
 	m_DynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

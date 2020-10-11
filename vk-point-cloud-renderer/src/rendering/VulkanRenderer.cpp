@@ -101,7 +101,7 @@ bool vkpc::VulkanRenderer::Init()
 		//nooooo!
 	}
 
-	VulkanDescriptorSet* descriptorSet = new VulkanDescriptorSet(VulkanContext::GetDevice()->GetLogicalDevice());
+	VulkanDescriptorSet* descriptorSet = new VulkanDescriptorSet(VulkanContext::GetDevice(), descriptorPool);
 	descriptorSet->AddLayout(descriptorSetLayout);
 	if (!descriptorSet->Construct())
 	{}
@@ -152,9 +152,23 @@ bool vkpc::VulkanRenderer::Init()
 		//Something went wrong!
 	}
 
-	//Create Frame buffers.
-	//std::vector<VulkanFrameBuffer*> frameBuffers(swapchain->GetImageCount());
-	//VulkanFramebuffer* framebuffer for each swapchain in-flight frame probably 2.
+	VkExtent2D swapChainExtent = SwapChain->GetExtent();
+
+	//Create framebuffers for the render pass from the swapchain images.
+	std::vector<VulkanFrameBuffer*> frameBuffers(SwapChain->GetFrameCount());
+	for (auto& imageView : SwapChain->GetImageViews())
+	{
+		VulkanFrameBuffer* frameBuffer = new VulkanFrameBuffer(VulkanContext::GetDevice(), renderPass, swapChainExtent.width, swapChainExtent.height);
+		//frameBuffer->AddImageView(depth)
+		frameBuffer->AddImageView(imageView);
+
+		if (!frameBuffer->Construct())
+		{
+			//something went wrong!
+		}
+
+		frameBuffers.push_back(frameBuffer);
+	}
 
 	//create sync primitives.
 	//a fence and two semphores for each in-flight frame.

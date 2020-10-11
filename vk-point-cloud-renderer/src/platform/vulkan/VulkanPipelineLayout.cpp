@@ -17,6 +17,11 @@ VkPipelineLayout vkpc::VulkanPipelineLayout::GetVkPipelineLayout()
 	return m_PipelineLayout;
 }
 
+void vkpc::VulkanPipelineLayout::AddDescriptorSetLayout(VulkanDescriptorSetLayout* setLayout)
+{
+	m_SetLayouts.push_back(setLayout);
+}
+
 bool vkpc::VulkanPipelineLayout::Construct()
 {
 	if (!CreatePipelineLayout())

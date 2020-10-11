@@ -3,6 +3,9 @@
 #include <algorithm>
 
 #include "platform/vulkan/VulkanContext.h"
+#include "platform/vulkan/VulkanImage.h"
+#include "platform/vulkan/VulkanDevice.h"
+#include "platform/vulkan/VulkanImageView.h"
 
 
 vkpc::VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, VulkanSurface* surface, VkExtent2D actualExtent)
@@ -44,6 +47,21 @@ VkSwapchainKHR vkpc::VulkanSwapChain::GetSwapChain()
 VkFormat vkpc::VulkanSwapChain::GetSwapChainImageFormat()
 {
 	return m_SwapChainImageFormat;
+}
+
+VkExtent2D vkpc::VulkanSwapChain::GetExtent() const
+{
+	return m_Extent;
+}
+
+uint32 vkpc::VulkanSwapChain::GetFrameCount()
+{
+	return GetImageCount(m_CachedSwapChainSupport);
+}
+
+std::vector<vkpc::VulkanImageView*> vkpc::VulkanSwapChain::GetImageViews()
+{
+	return m_SwapChainImageViews;
 }
 
 bool vkpc::VulkanSwapChain::CreateSwapChain()
@@ -103,25 +121,34 @@ bool vkpc::VulkanSwapChain::CreateSwapChainImageViews()
 {
 	m_SwapChainImageViews.resize(m_SwapChainImages.size());
 
-	for (size_t i = 0; i < m_SwapChainImages.size(); i++) {
-		VkImageViewCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image = m_SwapChainImages[i];
-		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format = m_SwapChainImageFormat;
-		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		createInfo.subresourceRange.baseMipLevel = 0;
-		createInfo.subresourceRange.levelCount = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount = 1;
+	for (size_t i = 0; i < m_SwapChainImages.size(); i++) 
+	{
+		VulkanImageView* imageView = new VulkanImageView(m_Device, m_SwapChainImages[i]);
 
-		if (vkCreateImageView(m_Device->GetLogicalDevice(), &createInfo, nullptr, &m_SwapChainImageViews[i]) != VK_SUCCESS) {
+		imageView->SetViewType(VK_IMAGE_VIEW_TYPE_2D);
+		imageView->SetFormat(m_SwapChainImageFormat);
+
+		VkComponentMapping componentMapping;
+		componentMapping.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		componentMapping.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		componentMapping.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		componentMapping.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageView->SetComponentMapping(componentMapping);
+
+		VkImageSubresourceRange subresourceRange;
+		subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		subresourceRange.baseMipLevel = 0;
+		subresourceRange.levelCount = 1;
+		subresourceRange.baseArrayLayer = 0;
+		subresourceRange.layerCount = 1;
+		imageView->SetSubresourceRange(subresourceRange);
+
+		if (imageView->Construct()) 
+		{
 			return false;
 		}
+
+		m_SwapChainImageViews.push_back(imageView);
 	}
 
 	return true;
@@ -132,7 +159,7 @@ void vkpc::VulkanSwapChain::DestroySwapChainImageViews()
 	if (m_SwapChainImageViews.size() > 0 && m_SwapChain != VK_NULL_HANDLE)
 	{
 		for (auto imageView : m_SwapChainImageViews) {
-			vkDestroyImageView(m_Device->GetLogicalDevice(), imageView, nullptr);
+			delete imageView;
 		}
 	}
 }
@@ -142,7 +169,15 @@ bool vkpc::VulkanSwapChain::GetSwapChainImages()
 	uint32_t imageCount = GetImageCount(m_CachedSwapChainSupport);
 	m_SwapChainImages.resize(imageCount);
 
-	vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_SwapChain, &imageCount, m_SwapChainImages.data());
+	std::vector<VkImage> images(imageCount);
+
+	vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_SwapChain, &imageCount, images.data());
+
+	//Build our abstractions.
+	for(const auto& image : images)
+	{
+		m_SwapChainImages.push_back(new VulkanImage(m_Device, image));
+	}
 
 	m_SwapChainImageFormat = m_SurfaceFormat.format;
 	m_SwapChainExtent = m_Extent;

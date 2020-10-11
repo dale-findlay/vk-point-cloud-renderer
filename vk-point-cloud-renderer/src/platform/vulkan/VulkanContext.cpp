@@ -258,7 +258,7 @@ VkPhysicalDevice vkpc::VulkanContext::PickPhysicalDevice()
 
 	if (deviceCount == 0) {
 		VKPC_LOG_ERROR("Failed to find GPUs with Vulkan support!");
-		return false;
+		return physicalDevice;
 	}
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -273,7 +273,7 @@ VkPhysicalDevice vkpc::VulkanContext::PickPhysicalDevice()
 
 	if (physicalDevice == VK_NULL_HANDLE) {
 		VKPC_LOG_ERROR("Couldn't find suitable GPU!");
-		return false;
+		return physicalDevice;
 	}
 
 	return physicalDevice;

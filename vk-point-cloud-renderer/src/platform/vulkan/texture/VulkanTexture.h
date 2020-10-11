@@ -22,8 +22,7 @@ namespace vkpc {
 
 		void DestroyImage();
 		void DestroySampler();
-		void D
-		estroyImageView();
+		void DestroyImageView();
 
 	public:
 		VkImage GetImage();

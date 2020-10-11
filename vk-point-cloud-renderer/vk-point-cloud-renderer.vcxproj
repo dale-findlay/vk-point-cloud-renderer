@@ -29,6 +29,7 @@
     <ClCompile Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSet.cpp" />
     <ClCompile Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSetLayout.cpp" />
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanShaderStage.cpp" />
+    <ClCompile Include="src\platform\vulkan\pipeline\VulkanVertexInputState.cpp" />
     <ClCompile Include="src\platform\vulkan\texture\VulkanTexture.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanCommandPool.cpp" />
@@ -37,11 +38,15 @@
     <ClCompile Include="src\platform\vulkan\VulkanBuffer.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanContext.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanDevice.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanFrameBuffer.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanGraphicsPipeline.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanImage.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanImageView.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanPipeline.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanPipelineCache.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanPipelineLayout.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanRenderPass.cpp" />
+    <ClCompile Include="src\platform\vulkan\VulkanSemaphore.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanShader.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanSurface.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanSwapChain.cpp" />
@@ -66,6 +71,7 @@
     <ClInclude Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSet.h" />
     <ClInclude Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSetLayout.h" />
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanShaderStage.h" />
+    <ClInclude Include="src\platform\vulkan\pipeline\VulkanVertexInputState.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTexture.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTexture2D.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTextureCubeMap.h" />
@@ -76,11 +82,16 @@
     <ClInclude Include="src\platform\vulkan\VulkanBuffer.h" />
     <ClInclude Include="src\platform\vulkan\VulkanDevice.h" />
     <ClInclude Include="src\platform\vulkan\VulkanContext.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanFence.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanFrameBuffer.h" />
     <ClInclude Include="src\platform\vulkan\VulkanGraphicsPipeline.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanImage.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanImageView.h" />
     <ClInclude Include="src\platform\vulkan\VulkanPipeline.h" />
     <ClInclude Include="src\platform\vulkan\VulkanPipelineCache.h" />
     <ClInclude Include="src\platform\vulkan\VulkanPipelineLayout.h" />
     <ClInclude Include="src\platform\vulkan\VulkanRenderPass.h" />
+    <ClInclude Include="src\platform\vulkan\VulkanSemaphore.h" />
     <ClInclude Include="src\platform\vulkan\VulkanShader.h" />
     <ClInclude Include="src\platform\vulkan\VulkanSurface.h" />
     <ClInclude Include="src\platform\vulkan\VulkanSwapChain.h" />
@@ -172,7 +183,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -186,7 +197,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -202,7 +213,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -220,7 +231,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
