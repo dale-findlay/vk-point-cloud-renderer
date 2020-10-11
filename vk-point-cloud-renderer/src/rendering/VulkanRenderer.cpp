@@ -5,11 +5,17 @@
 
 #include "platform/vulkan/VulkanDevice.h"
 #include "platform/vulkan/VulkanContext.h"
-#include "platform/vulkan/VulkanPipeline.h"
 #include "platform/vulkan/VulkanSwapChain.h"
 #include "platform/vulkan/VulkanRenderPass.h"
+#include "platform/vulkan/VulkanFrameBuffer.h"
+#include "platform/vulkan/VulkanPipeline.h"
 #include "platform/vulkan/VulkanPipelineCache.h"
 #include "platform/vulkan/VulkanPipelineLayout.h"
+#include "platform/vulkan/pipeline/VulkanVertexInputState.h"
+
+#include "platform/vulkan/descriptorsets/VulkanDescriptorPool.h"
+#include "platform/vulkan/descriptorsets/VulkanDescriptorSet.h"
+#include "platform/vulkan/descriptorsets/VulkanDescriptorSetLayout.h"
 
 #include "rendering/core/Vertex.h"
 
@@ -83,26 +89,49 @@ bool vkpc::VulkanRenderer::Init()
 	/*
 		Build Descriptor Sets for shaders.
 	*/
+	VulkanDescriptorPool* descriptorPool = new VulkanDescriptorPool(VulkanContext::GetDevice());
+	descriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1); //we need 1 ubo.
+	descriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2); //we need 2 textures.
+	descriptorPool->SetMaxSets(2);
 
-	//VulkanDescriptorSetLayout* descriptorSetLayout = new VulkanDescriptorSetLayout();
-	
+	VulkanDescriptorSetLayout* descriptorSetLayout = new VulkanDescriptorSetLayout(VulkanContext::GetDevice());
+	descriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	descriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+	if(!descriptorSetLayout->Construct()) {
+		//nooooo!
+	}
+
+	VulkanDescriptorSet* descriptorSet = new VulkanDescriptorSet(VulkanContext::GetDevice()->GetLogicalDevice());
+	descriptorSet->AddLayout(descriptorSetLayout);
+	if (!descriptorSet->Construct())
+	{}
+
+	descriptorSet->ClearDescriptors();
+	//descriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	//descriptorSet->AddCopyDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	descriptorSet->UpdateDescriptorSet();	
+
 	//Create Pipeline Layout.
 	VulkanPipelineLayout* pipelineLayout = new VulkanPipelineLayout(VulkanContext::GetDevice());
-	//
-	
-	if (!pipelineLayout->ConstructPipelineLayout())
+	pipelineLayout->AddDescriptorSetLayout(descriptorSetLayout);
+
+	if (!pipelineLayout->Construct())
 	{
-		
 	}
 
 	/*
 		Create Graphics Pipeline.
 	*/
-	VulkanPipelineCache* pipelineCache = new VulkanPipelineCache(VulkanContext::GetDevice());
-	
+	VulkanPipelineCache* pipelineCache = new VulkanPipelineCache(VulkanContext::GetDevice());	
 	VulkanGraphicsPipeline* graphicsPipeline = new VulkanGraphicsPipeline(VulkanContext::GetDevice(), pipelineCache);
 	
-	graphicsPipeline->SetVertexInputStage();// NEED TO IMPLEMENT THIS!
+	VulkanVertexInputState* state = new VulkanVertexInputState();
+	//state->AddVertexAttributeBinding(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX)
+	//state->AddVertexAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position))
+	//state->AddVertexAttributeDescription(0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv))
+	//state->AddVertexAttributeDescription(0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal))
+	
+	graphicsPipeline->SetVertexInputStage(state);
 	
 	graphicsPipeline->SetInputAssemblerStage(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
 	graphicsPipeline->SetRasterizationStage(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
@@ -110,6 +139,7 @@ bool vkpc::VulkanRenderer::Init()
 	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 	colorBlendAttachment.colorWriteMask = 0xf;
 	colorBlendAttachment.blendEnable = VK_FALSE;
+
 	graphicsPipeline->SetColorBlendStage({ colorBlendAttachment });
 
 	graphicsPipeline->SetDepthStencilStage(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
@@ -123,6 +153,7 @@ bool vkpc::VulkanRenderer::Init()
 	}
 
 	//Create Frame buffers.
+	//std::vector<VulkanFrameBuffer*> frameBuffers(swapchain->GetImageCount());
 	//VulkanFramebuffer* framebuffer for each swapchain in-flight frame probably 2.
 
 	//create sync primitives.

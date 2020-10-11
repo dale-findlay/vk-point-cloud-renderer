@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <vulkan/vulkan.h>
 #include "platform/vulkan/core/VulkanDeviceResource.h"
 
@@ -12,15 +13,19 @@ namespace vkpc {
 
 		VkPipelineLayout GetVkPipelineLayout();
 
-		bool ConstructPipelineLayout();
+		void AddDescriptorSetLayout(class VulkanDescriptorSetLayout* setLayout);
+
+		bool Construct();
 
 	private:
 		bool CreatePipelineLayout();
 		void DestroyPipelineLayout();
 
 	protected:
-		class VulkanDevice* m_Device;
-		
+		class VulkanDevice* m_OwningDevice;
+
+		std::vector<VulkanDescriptorSetLayout*> m_SetLayouts;
+
 		VkPipelineLayout m_PipelineLayout;
 	};
 }

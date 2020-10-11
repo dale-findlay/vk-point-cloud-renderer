@@ -28,6 +28,11 @@ size_t vkpc::VulkanBuffer::GetSize() const
 	return m_Size;
 }
 
+VkDescriptorBufferInfo vkpc::VulkanBuffer::GetDescriptorInfo()
+{
+	return m_DescriptorInfo;
+}
+
 VkSharingMode vkpc::VulkanBuffer::GetSharingMode() const
 {
 	return m_SharingMode;
@@ -122,6 +127,14 @@ void vkpc::VulkanBuffer::FreeMemory()
 		vkFreeMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory, nullptr);
 		m_DeviceMemory = VK_NULL_HANDLE;
 	}
+}
+
+void vkpc::VulkanBuffer::SetupDescriptorInfo()
+{
+	m_DescriptorInfo = {};
+	m_DescriptorInfo.buffer = m_Buffer;
+	m_DescriptorInfo.offset = 0;
+	m_DescriptorInfo.range = VK_WHOLE_SIZE;
 }
 
 uint32 vkpc::VulkanBuffer::FindMemoryType(uint32 filter, VkMemoryPropertyFlags properties)

@@ -12,7 +12,7 @@ namespace vkpc {
 
 		void SetRenderPass(class VulkanRenderPass* renderPass);
 
-		void SetVertexInputStage();
+		void SetVertexInputStage(class VulkanVertexInputState* vertexInputState);
 		void SetInputAssemblerStage(VkPrimitiveTopology topology, VkPipelineInputAssemblyStateCreateFlags flags, VkBool32 primitiveRestartEnable);
 		void SetRasterizationStage(VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipelineRasterizationStateCreateFlags flags = 0);
 		void SetColorBlendStage(const std::vector<VkPipelineColorBlendAttachmentState> attachments);

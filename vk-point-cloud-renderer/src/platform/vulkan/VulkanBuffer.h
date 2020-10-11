@@ -13,10 +13,13 @@ namespace vkpc {
 
 		VkBuffer GetVkBuffer();
 		size_t GetSize() const;
+
+		VkDescriptorBufferInfo GetDescriptorInfo();
 	
 		VkSharingMode GetSharingMode() const;
 
 		bool FillBuffer(void* block, size_t size, VkMemoryPropertyFlags properties);
+
 
 	private:
 		bool CreateBuffer();
@@ -25,12 +28,16 @@ namespace vkpc {
 		bool AllocateMemory(VkMemoryPropertyFlags properties);
 		void FreeMemory();
 
+		void SetupDescriptorInfo();
+
 		uint32 FindMemoryType(uint32 filter, VkMemoryPropertyFlags properties);
 
 	private:
 		class VulkanDevice* m_OwningDevice;
 
 		size_t m_Size;
+
+		VkDescriptorBufferInfo m_DescriptorInfo;
 
 		VkBufferCreateFlags m_CreateFlags;
 		VkBufferUsageFlags m_UsageFlags;

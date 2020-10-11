@@ -4,6 +4,7 @@
 #include "platform/vulkan/VulkanRenderPass.h"
 #include "platform/vulkan/VulkanPipelineLayout.h"
 #include "platform/vulkan/pipeline/VulkanShaderStage.h"
+#include "platform/vulkan/pipeline/VulkanVertexInputState.h"
 #include "platform/vulkan/VulkanPipelineCache.h"
 
 vkpc::VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* device, VulkanPipelineCache* pipelineCache)
@@ -18,9 +19,9 @@ void vkpc::VulkanGraphicsPipeline::SetRenderPass(VulkanRenderPass* renderPass)
 	m_RenderPass = renderPass;
 }
 
-void vkpc::VulkanGraphicsPipeline::SetVertexInputStage()
+void vkpc::VulkanGraphicsPipeline::SetVertexInputStage(VulkanVertexInputState* vertexInputState)
 {
-	//TO DO SETUPO THIS!
+	m_VertexInputStateCreateInfo = vertexInputState->GetVertexInputState();
 }
 
 void vkpc::VulkanGraphicsPipeline::SetInputAssemblerStage(VkPrimitiveTopology topology, VkPipelineInputAssemblyStateCreateFlags flags, VkBool32 primitiveRestartEnable)
