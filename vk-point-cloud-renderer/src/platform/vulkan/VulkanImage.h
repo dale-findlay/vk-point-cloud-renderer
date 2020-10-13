@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/CoreMinimal.h"
+
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -15,6 +17,19 @@ namespace vkpc {
 
 		VkImage GetVkImage();
 
+		//When constructing the image yourself you can use these functions.
+
+		void SetImageType(VkImageType type);
+		void SetFormat(VkFormat format);
+		void SetExtent(VkExtent3D extent);
+		void SetMipLevels(uint32 mipLevels);
+		void SetArrayLayers(uint32 arrayLayers);
+		void SetSamples(VkSampleCountFlagBits samples);
+		void SetTiling(VkImageTiling tiling);
+		void SetUsage(VkImageUsageFlags imageUsageFlags);
+
+		bool Construct();
+
 	private:
 		bool CreateImage();
 		void DestroyImage();
@@ -24,5 +39,8 @@ namespace vkpc {
 
 		class VulkanDevice* m_OwningDevice;	
 		VkImage m_Image;
+
+		VkImageCreateInfo m_ImageCreateInfo;
+		VkDeviceMemory m_ImageDeviceMemory;
 	};
 }

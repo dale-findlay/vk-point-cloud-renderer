@@ -25,13 +25,13 @@ namespace vkpc {
 		VkPhysicalDevice GetPhysicalDevice() const;
 		VkDevice GetLogicalDevice() const;
 		QueueFamilyIndices GetQueueFamilyIndices() const;
-
 		VkFormat GetDepthFormat();
+		uint32 GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound = nullptr);
 
 		VulkanBuffer* CreateBuffer(size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE, VkBufferCreateFlags createFlags = -1);
-		
+
 		//VulkanCommandPool* CreateCommandPool(uint32 queueFamilyIndex);
-		
+
 		//Get Queues!
 		VkQueue GetGraphicsQueue();
 		VkQueue GetPresentQueue();
@@ -45,8 +45,9 @@ namespace vkpc {
 
 	private:
 		void CacheQueueFamilyIndicies();
+		void CacheMemoryProperties();
 		bool GetValidDepthFormat();
-		
+
 		bool CreateLogicalDevice();
 		void DestroyLogicalDevice();
 
@@ -57,13 +58,13 @@ namespace vkpc {
 
 		void CleanUpBuffers();
 
-	private:		
+	private:
 		VkPhysicalDevice m_PhysicalDevice;
 		VkDevice m_LogicalDevice;
 
 		VkQueue m_GraphicsQueue;
 		VkQueue m_PresentQueue;
-		VkQueue m_ComputeQueue;		
+		VkQueue m_ComputeQueue;
 
 		VkFormat m_DepthFormat;
 
@@ -73,5 +74,6 @@ namespace vkpc {
 		std::vector<VulkanCommandPool*> m_CommandPools;
 
 		QueueFamilyIndices m_QueueFamilyIndices;
+		VkPhysicalDeviceMemoryProperties m_CachedMemoryProperties;
 	};
 }

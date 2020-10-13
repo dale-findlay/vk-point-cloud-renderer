@@ -7,6 +7,7 @@ vkpc::VulkanDevice::VulkanDevice(VkPhysicalDevice physicalDevice)
 	: m_PhysicalDevice(physicalDevice)
 {
 	CacheQueueFamilyIndicies();
+	CacheMemoryProperties();
 
 	if (!CreateLogicalDevice())
 	{
@@ -41,6 +42,33 @@ vkpc::QueueFamilyIndices vkpc::VulkanDevice::GetQueueFamilyIndices() const
 VkFormat vkpc::VulkanDevice::GetDepthFormat()
 {
 	return m_DepthFormat;
+}
+
+uint32 vkpc::VulkanDevice::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound)
+{
+	for (uint32_t i = 0; i < m_CachedMemoryProperties.memoryTypeCount; i++)
+	{
+		if ((typeBits & 1) == 1)
+		{
+			if ((m_CachedMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				if (memTypeFound)
+				{
+					*memTypeFound = true;
+				}
+				return i;
+			}
+		}
+		typeBits >>= 1;
+	}
+
+	if (memTypeFound)
+	{
+		*memTypeFound = false;
+		return 0;
+	}
+
+	return VK_NULL_HANDLE;
 }
 
 vkpc::VulkanBuffer* vkpc::VulkanDevice::CreateBuffer(size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode, VkBufferCreateFlags createFlags)
@@ -178,6 +206,11 @@ void vkpc::VulkanDevice::CacheQueueFamilyIndicies()
 {
 	VulkanSurface* surface = VulkanContext::GetSurface();
 	m_QueueFamilyIndices = FindQueueFamilyIndices(GetPhysicalDevice(), surface->GetVkSurface());
+}
+
+void vkpc::VulkanDevice::CacheMemoryProperties()
+{
+	vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &m_CachedMemoryProperties);
 }
 
 bool vkpc::VulkanDevice::GetValidDepthFormat()

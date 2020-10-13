@@ -8,6 +8,8 @@
 #include "platform/vulkan/VulkanSwapChain.h"
 #include "platform/vulkan/VulkanRenderPass.h"
 #include "platform/vulkan/VulkanFrameBuffer.h"
+#include "platform/vulkan/VulkanImage.h"
+#include "platform/vulkan/VulkanImageView.h"
 
 #include "platform/vulkan/synchronization/VulkanSemaphore.h"
 #include "platform/vulkan/synchronization/VulkanFence.h"
@@ -186,6 +188,9 @@ bool vkpc::VulkanRenderer::Graphics_SetupDescriptorSet()
 
 bool vkpc::VulkanRenderer::Graphics_SetupDepthStencil()
 {
+	m_DepthStencilImage = new VulkanImage(m_Device);
+	m_DepthStencilImage->SetImageType(VkImageType);
+
 	return false;
 }
 
