@@ -45,7 +45,7 @@ void vkpc::VulkanRenderPass::AddSubpassDependency(VkSubpassDependency subpassDep
 	m_SubPassDependencies.push_back(subpassDependency);
 }
 
-bool vkpc::VulkanRenderPass::ConstructRenderPass()
+bool vkpc::VulkanRenderPass::Construct()
 {
 	return CreateRenderPass();
 }

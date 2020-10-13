@@ -4,7 +4,7 @@
 #include <optional>
 
 namespace vkpc {
-	typedef struct QueueFamilyIndices
+	struct QueueFamilyIndices
 	{
 		std::optional<uint32> graphicsFamily;
 		std::optional<uint32> presentFamily;

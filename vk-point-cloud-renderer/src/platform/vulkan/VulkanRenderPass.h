@@ -18,7 +18,7 @@ namespace vkpc {
 		
 		void AddSubpassDependency(VkSubpassDependency subpassDependency);
 
-		bool ConstructRenderPass();
+		bool Construct();
 		void DemolishRenderPass();
 
 	protected:
