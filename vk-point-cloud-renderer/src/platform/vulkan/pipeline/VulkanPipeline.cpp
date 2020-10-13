@@ -2,8 +2,8 @@
 
 #include "platform/vulkan/VulkanDevice.h"
 #include "platform/vulkan/VulkanShader.h"
-#include "platform/vulkan/VulkanPipelineLayout.h"
-#include "platform/vulkan/VulkanPipelineCache.h"
+#include "platform/vulkan/pipeline/VulkanPipelineLayout.h"
+#include "platform/vulkan/pipeline/VulkanPipelineCache.h"
 
 vkpc::VulkanPipeline::VulkanPipeline(VulkanDevice* device, VulkanPipelineCache* pipelineCache, VulkanPipelineType type)
 	: m_Pipeline(VK_NULL_HANDLE), m_Type(type), m_PipelineCache(pipelineCache)

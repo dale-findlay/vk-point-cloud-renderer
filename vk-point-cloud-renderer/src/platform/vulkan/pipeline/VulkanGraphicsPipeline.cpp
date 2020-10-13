@@ -2,10 +2,10 @@
 
 #include "platform/vulkan/VulkanDevice.h"
 #include "platform/vulkan/VulkanRenderPass.h"
-#include "platform/vulkan/VulkanPipelineLayout.h"
+#include "platform/vulkan/pipeline/VulkanPipelineLayout.h"
 #include "platform/vulkan/pipeline/VulkanShaderStage.h"
 #include "platform/vulkan/pipeline/VulkanVertexInputState.h"
-#include "platform/vulkan/VulkanPipelineCache.h"
+#include "platform/vulkan/pipeline/VulkanPipelineCache.h"
 
 vkpc::VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* device, VulkanPipelineCache* pipelineCache)
 	:VulkanPipeline(device, pipelineCache, VulkanPipelineType::Graphics)

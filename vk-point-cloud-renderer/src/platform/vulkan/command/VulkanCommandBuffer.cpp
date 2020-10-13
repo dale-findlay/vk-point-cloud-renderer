@@ -1,7 +1,7 @@
 #include "VulkanCommandBuffer.h"
 
 #include "platform/vulkan/VulkanDevice.h"
-#include "platform/vulkan/VulkanCommandPool.h"
+#include "platform/vulkan/command/VulkanCommandPool.h"
 
 vkpc::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* device, VulkanCommandPool* owningPool, VkCommandBuffer commandBuffer)
 	: m_OwningDevice(device), m_OwningPool(owningPool), m_CommandBuffer(commandBuffer)

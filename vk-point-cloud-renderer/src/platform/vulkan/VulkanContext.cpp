@@ -1,8 +1,7 @@
 #include "VulkanContext.h"
 
 #include <set>
-
-#include <platform/vulkan/core/SwapChainSupportDetails.h>
+#include "platform/vulkan/core/SwapChainSupportDetails.h"
 
 /*
 	Define all the static objects for the vulkan context.B

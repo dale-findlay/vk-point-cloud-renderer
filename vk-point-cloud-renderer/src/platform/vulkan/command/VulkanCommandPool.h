@@ -13,12 +13,15 @@ namespace vkpc {
 
 		VkCommandPool GetVkCommandPool();
 
-		bool AllocateCommandBuffers(size_t numBuffers, VkCommandBufferLevel level);
-		std::vector<class VulkanCommandBuffer*> GetCommandBuffers();
-
+		std::vector<class VulkanCommandBuffer*> AllocateCommandBuffers(size_t numBuffers, VkCommandBufferLevel level);
+		std::vector<class VulkanCommandBuffer*> AllocateCommandBuffer(VkCommandBufferLevel level);
+		
 	private:
 		bool CreateCommandPool();
 		void DestroyCommandPool();
+		
+		std::vector<class VulkanCommandBuffer*> AllocateCommandBuffersInternal(size_t numBuffers, VkCommandBufferLevel level);
+
 
 	private:
 		VulkanDevice* m_OwningDevice;

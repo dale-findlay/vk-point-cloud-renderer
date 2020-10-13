@@ -53,20 +53,6 @@ vkpc::VulkanBuffer* vkpc::VulkanDevice::CreateBuffer(size_t size, VkBufferUsageF
 	return newBuffer;
 }
 
-vkpc::VulkanCommandPool* vkpc::VulkanDevice::CreateCommandPool(uint32 queueFamilyIndex)
-{
-	VulkanCommandPool* newCommandPool = new VulkanCommandPool(this, queueFamilyIndex);
-	m_CommandPools.push_back(newCommandPool);
-	return newCommandPool;
-}
-
-vkpc::VulkanRenderPass* vkpc::VulkanDevice::CreateRenderPass()
-{
-	VulkanRenderPass* newRenderPass = new VulkanRenderPass(this);
-	m_RenderPasses.push_back(newRenderPass);
-	return newRenderPass;
-}
-
 vkpc::QueueFamilyIndices vkpc::VulkanDevice::FindQueueFamilyIndices(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
 {
 	QueueFamilyIndices indices;

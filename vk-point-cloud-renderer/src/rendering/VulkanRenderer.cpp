@@ -8,10 +8,14 @@
 #include "platform/vulkan/VulkanSwapChain.h"
 #include "platform/vulkan/VulkanRenderPass.h"
 #include "platform/vulkan/VulkanFrameBuffer.h"
-#include "platform/vulkan/VulkanPipeline.h"
-#include "platform/vulkan/VulkanPipelineCache.h"
-#include "platform/vulkan/VulkanPipelineLayout.h"
+
+#include "platform/vulkan/synchronization/VulkanSemaphore.h"
+#include "platform/vulkan/synchronization/VulkanFence.h"
+
 #include "platform/vulkan/pipeline/VulkanVertexInputState.h"
+#include "platform/vulkan/pipeline/VulkanPipeline.h"
+#include "platform/vulkan/pipeline/VulkanPipelineCache.h"
+#include "platform/vulkan/pipeline/VulkanPipelineLayout.h"
 
 #include "platform/vulkan/descriptorsets/VulkanDescriptorPool.h"
 #include "platform/vulkan/descriptorsets/VulkanDescriptorSet.h"
@@ -53,7 +57,7 @@ bool vkpc::VulkanRenderer::Init()
 	VulkanSwapChain* SwapChain = VulkanContext::GetSwapChain();
 
 	//Setup Main Render Pass
-	VulkanRenderPass* renderPass = VulkanContext::GetDevice()->CreateRenderPass();
+	VulkanRenderPass* renderPass = new VulkanRenderPass(VulkanContext::GetDevice());
 
 	//Create color attachment for swapchain.
 	VkAttachmentDescription colorAttachmentDescription = {};
@@ -81,10 +85,7 @@ bool vkpc::VulkanRenderer::Init()
 
 	renderPass->AddDepthStencilAttachment(depthStencilAttachmentDescription, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-	if (!renderPass->ConstructRenderPass())
-	{
-		//Something went wrong!
-	}
+	VKPC_ASSERT(renderPass->ConstructRenderPass());
 
 	/*
 		Build Descriptor Sets for shaders.
@@ -97,15 +98,15 @@ bool vkpc::VulkanRenderer::Init()
 	VulkanDescriptorSetLayout* descriptorSetLayout = new VulkanDescriptorSetLayout(VulkanContext::GetDevice());
 	descriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 	descriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
-	if(!descriptorSetLayout->Construct()) {
-		//nooooo!
-	}
+	VKPC_ASSERT(descriptorSetLayout->Construct());
 
 	VulkanDescriptorSet* descriptorSet = new VulkanDescriptorSet(VulkanContext::GetDevice(), descriptorPool);
 	descriptorSet->AddLayout(descriptorSetLayout);
-	if (!descriptorSet->Construct())
-	{}
-
+	VKPC_ASSERT(descriptorSet->Construct());
+	
+	/*
+	* Create descriptors and update set.
+	*/
 	descriptorSet->ClearDescriptors();
 	//descriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
 	//descriptorSet->AddCopyDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
@@ -114,11 +115,8 @@ bool vkpc::VulkanRenderer::Init()
 	//Create Pipeline Layout.
 	VulkanPipelineLayout* pipelineLayout = new VulkanPipelineLayout(VulkanContext::GetDevice());
 	pipelineLayout->AddDescriptorSetLayout(descriptorSetLayout);
-
-	if (!pipelineLayout->Construct())
-	{
-	}
-
+	VKPC_ASSERT(pipelineLayout->Construct());
+	
 	/*
 		Create Graphics Pipeline.
 	*/
@@ -131,8 +129,7 @@ bool vkpc::VulkanRenderer::Init()
 	//state->AddVertexAttributeDescription(0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv))
 	//state->AddVertexAttributeDescription(0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal))
 	
-	graphicsPipeline->SetVertexInputStage(state);
-	
+	graphicsPipeline->SetVertexInputStage(state);	
 	graphicsPipeline->SetInputAssemblerStage(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
 	graphicsPipeline->SetRasterizationStage(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 
@@ -147,10 +144,7 @@ bool vkpc::VulkanRenderer::Init()
 	graphicsPipeline->SetMultisampleStage(VK_SAMPLE_COUNT_1_BIT, 0);
 	graphicsPipeline->SetDynamicStage({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR });
 
-	if (!graphicsPipeline->ConstructPipeline())
-	{
-		//Something went wrong!
-	}
+	VKPC_ASSERT(graphicsPipeline->ConstructPipeline());
 
 	VkExtent2D swapChainExtent = SwapChain->GetExtent();
 
@@ -170,14 +164,18 @@ bool vkpc::VulkanRenderer::Init()
 		frameBuffers.push_back(frameBuffer);
 	}
 
-	//create sync primitives.
-	//a fence and two semphores for each in-flight frame.
 
-	//Build compute pipeline. Actually implement it aswell lol.
+	VulkanCommandPool* commandPool = new VulkanCommandPool(VulkanContext::GetDevice(), VulkanContext::GetDevice()->GetQueueFamilyIndices().graphicsFamily.value());
 
-	//
+	std::vector<VulkanCommandBuffer*> drawCommandBuffers = commandPool->AllocateCommandBuffers(SwapChain->GetFrameCount(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-	return result;
+	//Create a couple of semaphores to keep track of the swapchain synchronization.
+	VulkanSemaphore* presentComplete = new VulkanSemaphore(VulkanContext::GetDevice());
+	VulkanSemaphore* renderComplete = new VulkanSemaphore(VulkanContext::GetDevice());
+
+	//Build compute pipeline. Actually implement it as well lol.
+
+	return true;
 }
 
 void vkpc::VulkanRenderer::Update()

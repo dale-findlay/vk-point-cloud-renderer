@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <vulkan/vulkan.h>
-#include "platform/vulkan/VulkanPipeline.h"
+#include "platform/vulkan/pipeline/VulkanPipeline.h"
 
 namespace vkpc {
 	class VulkanGraphicsPipeline : public VulkanPipeline {
