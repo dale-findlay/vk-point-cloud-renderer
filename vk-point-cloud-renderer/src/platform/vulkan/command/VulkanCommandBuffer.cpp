@@ -10,6 +10,11 @@ vkpc::VulkanCommandBuffer::VulkanCommandBuffer(VulkanDevice* device, VulkanComma
 vkpc::VulkanCommandBuffer::~VulkanCommandBuffer()
 {}
 
+VkCommandBuffer vkpc::VulkanCommandBuffer::GetVkCommandBuffer()
+{
+	return m_CommandBuffer;
+}
+
 bool vkpc::VulkanCommandBuffer::Begin()
 {
 	return false;

@@ -10,9 +10,12 @@ namespace vkpc {
 	private:
 		friend class VulkanCommandPool;		
 		VulkanCommandBuffer(class VulkanDevice* device, class VulkanCommandPool* owningPool, VkCommandBuffer commandBuffer);
+	
+	public:
 		~VulkanCommandBuffer(); // The command pool will clean up the vk resource!
 
-	public:
+		VkCommandBuffer GetVkCommandBuffer();
+
 		bool Begin();
 		bool End();
 

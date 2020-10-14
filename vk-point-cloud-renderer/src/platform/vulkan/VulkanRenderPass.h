@@ -21,6 +21,9 @@ namespace vkpc {
 		bool Construct();
 		void DemolishRenderPass();
 
+		void Begin();
+		void End();
+
 	protected:
 		bool CreateRenderPass();
 		void DestroyRenderPass();

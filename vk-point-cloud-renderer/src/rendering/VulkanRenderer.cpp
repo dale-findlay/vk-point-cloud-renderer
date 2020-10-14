@@ -3,6 +3,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "application/Application.h"
+#include "platform/PlatformWindow.h"
+
 #include "platform/vulkan/VulkanDevice.h"
 #include "platform/vulkan/VulkanContext.h"
 #include "platform/vulkan/VulkanSwapChain.h"
@@ -60,7 +63,9 @@ void vkpc::VulkanRenderer::Update()
 
 void vkpc::VulkanRenderer::Shutdown()
 {
-	
+	DismantleCompute();
+	DismantleGraphics();
+	DismantleApplication();
 }
 
 bool vkpc::VulkanRenderer::SetupApplication()
@@ -189,9 +194,53 @@ bool vkpc::VulkanRenderer::Graphics_SetupDescriptorSet()
 bool vkpc::VulkanRenderer::Graphics_SetupDepthStencil()
 {
 	m_DepthStencilImage = new VulkanImage(m_Device);
-	m_DepthStencilImage->SetImageType(VkImageType);
+	m_DepthStencilImage->SetImageType(VK_IMAGE_TYPE_2D);
+	m_DepthStencilImage->SetFormat(m_Device->GetDepthFormat());
 
-	return false;
+	platform::PlatformWindow* window = m_Application->GetSubSystem<platform::PlatformWindow>();
+
+	m_DepthStencilImage->SetExtent({ window->GetWindowWidth(), window->GetWindowHeight(), 1 });
+
+	m_DepthStencilImage->SetMipLevels(1);
+	m_DepthStencilImage->SetArrayLayers(1);
+	m_DepthStencilImage->SetSamples(VK_SAMPLE_COUNT_1_BIT);
+	m_DepthStencilImage->SetTiling(VK_IMAGE_TILING_OPTIMAL);
+	m_DepthStencilImage->SetUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
+	VKPC_ASSERT(m_DepthStencilImage->Construct());
+
+	if (!m_DepthStencilImage->IsValid())
+	{
+		return false;
+	}
+
+	//Create image view.
+	m_DepthStencilImageView = new VulkanImageView(m_Device, m_DepthStencilImage);
+	m_DepthStencilImageView->SetFormat(m_Device->GetDepthFormat());
+	m_DepthStencilImageView->SetViewType(VK_IMAGE_VIEW_TYPE_2D);
+
+	VkImageSubresourceRange subresourceRange{};
+	subresourceRange.baseMipLevel = 0;
+	subresourceRange.levelCount = 1;
+	subresourceRange.baseArrayLayer = 0;
+	subresourceRange.layerCount = 1;
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	
+	//only include stencil aspect mask on platforms that support it.
+	if (m_Device->GetDepthFormat() > VK_FORMAT_D16_UNORM_S8_UINT)
+	{
+		subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+	m_DepthStencilImageView->SetSubresourceRange(subresourceRange);
+
+	VKPC_ASSERT(m_DepthStencilImageView->Construct());
+
+	if (!m_DepthStencilImageView->IsValid())
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool vkpc::VulkanRenderer::Graphics_SetupSyncPrimitives()
@@ -314,8 +363,115 @@ bool vkpc::VulkanRenderer::Graphics_BuildFramebuffers()
 	return result;
 }
 
+void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
+{
+	m_RenderPass->SetRenderArea();
+
+	VkClearValue clearValues[2];
+	clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };;
+	clearValues[1].depthStencil = { 1.0f, 0 };
+
+	m_RenderPass->SetClearValues(clearValues);
+
+	platform::PlatformWindow* window = m_Application->GetSubSystem<platform::PlatformWindow>();
+	uint32 width = window->GetWindowWidth();
+	uint32 height = window->GetWindowHeight();
+
+	for (int32 i = 0; i < m_DrawCommandBuffers.size(); ++i)
+	{
+		VulkanCommandBuffer* commandBuffer = m_DrawCommandBuffers[i];
+		commandBuffer->Begin();
+
+		//Aquire a lock on the SSBO device memory from the compute pipeline.
+		//VulkanPipelineBarrier computeToGraphics;
+		//computeToGraphics.SetSrcQueueFamily(m_Device->GetComputeFamily());
+		//computeToGraphics->SetSrcAccessMask(VK_ACCESS_SHADER_WRITE_BIT);
+		//computeToGraphics.SetDstQueueFamily(m_Device->GetGraphicsFamily());
+		//computeToGraphics->SetDstAccessMask(VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
+		//computeToGraphics->SetSize(VK_WHOLE_SIZE);		
+		//computeToGraphics->AddBuffer(m_ComputeInputSSBO);
+		//computeToGraphics->AddBuffer(m_ComputeOuputSSBO);
+		//computeToGraphics->Execute(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_FLAGS_NONE);
+
+		m_RenderPass->Begin();
+
+		VkViewport viewport = {};
+		viewport.width = (float)width;
+		viewport.height = (float)height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer->GetVkCommandBuffer(), 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.extent.width = width;
+		scissor.extent.height = height;
+		scissor.offset.x = 0;
+		scissor.offset.y = 0;
+		vkCmdSetScissor(commandBuffer->GetVkCommandBuffer(), 0, 1, &scissor);
+
+		VkDeviceSize offsets[1] = { 0 };
+
+		//Draw stuff here.
+
+		m_RenderPass->End();
+
+		//Release buffer memory back to the compute pipeline.
+
+		//VulkanPipelineBarrier graphicsToCompute;
+		//graphicsToCompute.SetSrcQueueFamily(m_Device->GetGraphicsFamily());
+		//graphicsToCompute->SetSrcAccessMask(VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
+		//graphicsToCompute.SetDstQueueFamily(m_Device->GetComputeFamily());
+		//graphicsToCompute->SetDstAccessMask(VK_ACCESS_SHADER_WRITE_BIT);
+		//graphicsToCompute->SetSize(VK_WHOLE_SIZE);		
+		//graphicsToCompute->AddBuffer(m_ComputeInputSSBO);
+		//graphicsToCompute->AddBuffer(m_ComputeOuputSSBO);
+		//graphicsToCompute->Execute(VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FLAGS_NONE);
+
+		commandBuffer->End();
+	}
+}
+
 void vkpc::VulkanRenderer::DismantleGraphics()
 {
+	//&VulkanRenderer::Graphics_BuildFramebuffers,
+	for (const auto& frameBuffer : m_FrameBuffers)
+	{
+		delete frameBuffer;
+	}
+
+	//& VulkanRenderer::Graphics_BuildPipeline,
+	delete m_GraphicsPipeline;
+	//& VulkanRenderer::Graphics_BuildPipelineLayout,
+	delete m_GraphicsPipelineLayout;
+	//& VulkanRenderer::Graphics_BuildPipelineCache,
+	delete m_GraphicsPipelineCache;		
+	
+	//& VulkanRenderer::Graphics_SetupDescriptorSetLayout,
+	//& VulkanRenderer::Graphics_SetupDescriptorPool,
+	delete m_DescriptorSet; // this wont free the vk resources because the pools does that!
+	delete m_DescriptorPool;
+	
+	//& VulkanRenderer::Graphics_SetupDescriptorSet,
+	delete m_DescriptorSetLayout;
+	
+	//& VulkanRenderer::Graphics_SetupDepthStencil,
+	delete m_DepthStencilImageView;
+	delete m_DepthStencilImage;
+
+	//& VulkanRenderer::Graphics_BuildRenderPass,
+	delete m_RenderPass;
+
+	//& VulkanRenderer::Graphics_SetupSyncPrimitives,
+	delete m_GraphicsPresentSemaphore;
+	delete m_GraphicsRenderCompleteSemaphore;
+
+	//& VulkanRenderer::Graphics_SetupCommandBuffers,
+	for (const auto& cmdBuffer : m_DrawCommandBuffers)
+	{
+		delete cmdBuffer;
+	}
+
+	delete m_GraphicsCommandPool;
 }
 
 bool vkpc::VulkanRenderer::SetupCompute()

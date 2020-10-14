@@ -35,6 +35,9 @@ namespace vkpc {
 		bool Graphics_BuildPipelineCache();
 		bool Graphics_BuildPipelineLayout();
 		bool Graphics_BuildFramebuffers();
+
+		void Graphics_RecordCommandBuffers();
+
 		void DismantleGraphics();
 
 		bool SetupCompute();

@@ -55,6 +55,14 @@ void vkpc::VulkanRenderPass::DemolishRenderPass()
 	DestroyRenderPass();
 }
 
+void vkpc::VulkanRenderPass::Begin()
+{
+}
+
+void vkpc::VulkanRenderPass::End()
+{
+}
+
 bool vkpc::VulkanRenderPass::CreateRenderPass()
 {
 	VkSubpassDescription subpassDescription = {};
