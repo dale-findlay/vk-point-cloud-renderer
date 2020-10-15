@@ -28,6 +28,7 @@
     <ClCompile Include="src\platform\vulkan\descriptorsets\VulkanDescriptorPool.cpp" />
     <ClCompile Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSet.cpp" />
     <ClCompile Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSetLayout.cpp" />
+    <ClCompile Include="src\platform\vulkan\pipeline\VulkanComputePipeline.cpp" />
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanShaderStage.cpp" />
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanVertexInputState.cpp" />
     <ClCompile Include="src\platform\vulkan\texture\VulkanTexture.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="src\platform\vulkan\descriptorsets\VulkanDescriptorPool.h" />
     <ClInclude Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSet.h" />
     <ClInclude Include="src\platform\vulkan\descriptorsets\VulkanDescriptorSetLayout.h" />
+    <ClInclude Include="src\platform\vulkan\pipeline\VulkanComputePipeline.h" />
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanShaderStage.h" />
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanVertexInputState.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTexture.h" />

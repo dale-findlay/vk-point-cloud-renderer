@@ -19,6 +19,9 @@ namespace vkpc {
 		VkSwapchainKHR GetSwapChain();
 		VkFormat GetSwapChainImageFormat();
 
+		class VulkanImage* GetSwapChainImage(uint32 index);
+		class VulkanImageView* GetSwapChainImageView(uint32 index);
+
 		VkExtent2D GetExtent() const;
 
 		//Returns the maximum number of in-flight frames - usually the same as the number of image views.
@@ -36,7 +39,7 @@ namespace vkpc {
 		VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
-		bool GetSwapChainImages();
+		bool GetSwapChainImage();
 		uint32_t GetImageCount(const vkpc::SwapChainSupportDetails& swapChainSupport);
 
 	private:

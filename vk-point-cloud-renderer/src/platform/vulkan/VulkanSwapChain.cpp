@@ -20,7 +20,7 @@ vkpc::VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, VulkanSurface* surf
 		m_IsValid = false;
 	}
 
-	if (!GetSwapChainImages())
+	if (!GetSwapChainImage())
 	{
 		VKPC_LOG_ERROR("Failed to get vulkan swap chain images!");
 		m_IsValid = false;
@@ -47,6 +47,20 @@ VkSwapchainKHR vkpc::VulkanSwapChain::GetSwapChain()
 VkFormat vkpc::VulkanSwapChain::GetSwapChainImageFormat()
 {
 	return m_SwapChainImageFormat;
+}
+
+vkpc::VulkanImage* vkpc::VulkanSwapChain::GetSwapChainImage(uint32 index)
+{
+	VKPC_ASSERT(index < m_SwapChainImages.size());
+
+	return m_SwapChainImages[index];
+}
+
+vkpc::VulkanImageView* vkpc::VulkanSwapChain::GetSwapChainImageView(uint32 index)
+{
+	VKPC_ASSERT(index < m_SwapChainImageViews.size());
+
+	return m_SwapChainImageViews[index];
 }
 
 VkExtent2D vkpc::VulkanSwapChain::GetExtent() const
@@ -164,7 +178,7 @@ void vkpc::VulkanSwapChain::DestroySwapChainImageViews()
 	}
 }
 
-bool vkpc::VulkanSwapChain::GetSwapChainImages()
+bool vkpc::VulkanSwapChain::GetSwapChainImage()
 {
 	uint32_t imageCount = GetImageCount(m_CachedSwapChainSupport);
 	m_SwapChainImages.resize(imageCount);

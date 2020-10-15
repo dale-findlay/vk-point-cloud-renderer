@@ -23,24 +23,31 @@ namespace vkpc {
 		bool SetupApplication();
 		void DismantleApplication();
 
+		bool SetupShared();
+		bool Shared_SetupDescriptorPool();
+		bool Shared_BuildPipelineCache();
+		void DismantleShared();	
+
 		bool SetupGraphics();
 		bool Graphics_SetupCommandBuffers();
-		bool Graphics_SetupDescriptorPool();
-		bool Graphics_SetupDescriptorSetLayout();
-		bool Graphics_SetupDescriptorSet();
 		bool Graphics_SetupDepthStencil();
 		bool Graphics_SetupSyncPrimitives();
 		bool Graphics_BuildRenderPass();
-		bool Graphics_BuildPipeline();
-		bool Graphics_BuildPipelineCache();
-		bool Graphics_BuildPipelineLayout();
 		bool Graphics_BuildFramebuffers();
-
+		
 		void Graphics_RecordCommandBuffers();
-
 		void DismantleGraphics();
 
 		bool SetupCompute();
+		bool Compute_SetupDescriptorSetLayout();
+		bool Compute_SetupDescriptorSets();
+		bool Compute_SetupShaders();
+		bool Compute_SetupPipelineLayouts();
+		bool Compute_SetupPipelines();
+		bool Compute_SetupCommandBuffers();
+		bool Compute_SetupSyncPrimitives();
+
+		void Compute_RecordCommandBuffers();
 		void DismantleCompute();
 
 		/*
@@ -51,25 +58,52 @@ namespace vkpc {
 	private:
 		class VulkanDevice* m_Device;
 		class VulkanSwapChain* m_SwapChain;
+		
+		class VulkanDescriptorPool* m_SharedDescriptorPool;
+		class VulkanPipelineCache* m_SharedPipelineCache;
 
 		/*
 		*	Graphics
 		*/
 		class VulkanCommandPool* m_GraphicsCommandPool;
-		std::vector<class VulkanCommandBuffer*> m_DrawCommandBuffers;
+		std::vector<class VulkanCommandBuffer*> m_GraphicsDrawCommandBuffers;
 		class VulkanRenderPass* m_RenderPass;
-		class VulkanDescriptorPool* m_DescriptorPool;
-		class VulkanDescriptorSetLayout* m_DescriptorSetLayout;
-		class VulkanDescriptorSet* m_DescriptorSet;
-		class VulkanPipelineLayout* m_PipelineLayout;
-		class VulkanGraphicsPipeline* m_GraphicsPipeline;
-		class VulkanPipelineCache* m_GraphicsPipelineCache;
-		class VulkanPipelineLayout* m_GraphicsPipelineLayout;
 		class VulkanSemaphore* m_GraphicsPresentSemaphore;
 		class VulkanSemaphore* m_GraphicsRenderCompleteSemaphore;
 		class VulkanImage* m_DepthStencilImage;
 		class VulkanImageView* m_DepthStencilImageView;
 		std::vector<class VulkanFrameBuffer*> m_FrameBuffers;
 
+		/*
+		*	Compute
+		*/
+		class VulkanCommandPool* m_ComputeCommandPool;
+		std::vector<class VulkanCommandBuffer*> m_ComputeCommandBuffers; //still one for each swapchain frame.
+
+		//Depth pre-pass
+		class VulkanShader* m_ComputeDepthShader;
+		class VulkanDescriptorSetLayout* m_ComputeDepthDescriptorSetLayout;
+		class VulkanDescriptorSet* m_ComputeDepthDescriptorSet;		
+		class VulkanPipelineLayout* m_ComputeDepthPipelineLayout;
+		class VulkanComputePipeline* m_ComputeDepthPipeline;
+
+		//Render and encode.
+		class VulkanShader* m_ComputeRenderShader;
+		class VulkanDescriptorSetLayout* m_ComputeRenderDescriptorSetLayout;
+		class VulkanDescriptorSet* m_ComputeRenderDescriptorSet;
+
+		class VulkanPipelineLayout* m_ComputeRenderPipelineLayout;
+		class VulkanComputePipeline* m_ComputeRenderPipeline;
+
+		//Resolve to final output image
+		class VulkanShader* m_ComputeResolveShader;
+		class VulkanDescriptorSetLayout* m_ComputeResolveDescriptorSetLayout;
+		class VulkanDescriptorSet* m_ComputeResolveDescriptorSet;
+		
+		class VulkanPipelineLayout* m_ComputeResolvePipelineLayout;
+		class VulkanComputePipeline* m_ComputeResolvePipeline;
+		
+		class VulkanSemaphore* m_ComputeReadySemaphore;
+		class VulkanSemaphore* m_ComputeRenderCompleteSemaphore;
 	};
 }

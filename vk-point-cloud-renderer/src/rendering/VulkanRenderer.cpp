@@ -18,9 +18,12 @@
 #include "platform/vulkan/synchronization/VulkanFence.h"
 
 #include "platform/vulkan/pipeline/VulkanVertexInputState.h"
+#include "platform/vulkan/pipeline/VulkanShaderStage.h"
 #include "platform/vulkan/pipeline/VulkanPipeline.h"
 #include "platform/vulkan/pipeline/VulkanPipelineCache.h"
 #include "platform/vulkan/pipeline/VulkanPipelineLayout.h"
+#include "platform/vulkan/pipeline/VulkanComputePipeline.h"
+#include "platform/vulkan/pipeline/VulkanGraphicsPipeline.h"
 
 #include "platform/vulkan/descriptorsets/VulkanDescriptorPool.h"
 #include "platform/vulkan/descriptorsets/VulkanDescriptorSet.h"
@@ -42,11 +45,19 @@ bool vkpc::VulkanRenderer::Init()
 	m_Device = VulkanContext::GetDevice();
 	m_SwapChain = VulkanContext::GetSwapChain();
 
+	if (!SetupShared())
+	{
+		VKPC_LOG_ERROR("Failed to setup shared!");
+		return false;
+	}
+
 	if (!SetupGraphics())
 	{
 		VKPC_LOG_ERROR("Failed to setup graphics!");
 		return false;
 	}
+
+	Graphics_RecordCommandBuffers();
 
 	if (!SetupCompute())
 	{
@@ -54,17 +65,21 @@ bool vkpc::VulkanRenderer::Init()
 		return false;
 	}
 
+	Compute_RecordCommandBuffers();
+
 	return true;
 }
 
 void vkpc::VulkanRenderer::Update()
 {
+
 }
 
 void vkpc::VulkanRenderer::Shutdown()
 {
 	DismantleCompute();
 	DismantleGraphics();
+	DismantleShared();
 	DismantleApplication();
 }
 
@@ -102,23 +117,42 @@ void vkpc::VulkanRenderer::DismantleApplication()
 	VulkanContext::Shutdown();
 }
 
+bool vkpc::VulkanRenderer::SetupShared()
+{
+	return false;
+}
+
+bool vkpc::VulkanRenderer::Shared_BuildPipelineCache()
+{
+	m_SharedPipelineCache = new VulkanPipelineCache(m_Device);
+
+	return m_SharedPipelineCache->IsValid();
+}
+
+bool vkpc::VulkanRenderer::Shared_SetupDescriptorPool()
+{
+	return false;
+}
+
+void vkpc::VulkanRenderer::DismantleShared()
+{
+	//& VulkanRenderer::Shared_BuildPipelineCache,
+	delete m_SharedPipelineCache;
+
+	//& VulkanRenderer::Shared_SetupDescriptorPool,
+	delete m_SharedDescriptorPool;
+
+}
+
 bool vkpc::VulkanRenderer::SetupGraphics()
 {
 	bool result = true;
-
-	auto p = &VulkanRenderer::Graphics_SetupCommandBuffers;
 
 	std::vector<VulkanRenderer::VkRendererInitFunction> functions({
 		&VulkanRenderer::Graphics_SetupCommandBuffers,
 		&VulkanRenderer::Graphics_SetupSyncPrimitives,
 		&VulkanRenderer::Graphics_BuildRenderPass,
 		&VulkanRenderer::Graphics_SetupDepthStencil,
-		&VulkanRenderer::Graphics_SetupDescriptorPool,
-		&VulkanRenderer::Graphics_SetupDescriptorSetLayout,
-		&VulkanRenderer::Graphics_SetupDescriptorSet,
-		&VulkanRenderer::Graphics_BuildPipelineCache,
-		&VulkanRenderer::Graphics_BuildPipelineLayout,
-		&VulkanRenderer::Graphics_BuildPipeline,
 		&VulkanRenderer::Graphics_BuildFramebuffers,
 		});
 
@@ -133,12 +167,12 @@ bool vkpc::VulkanRenderer::Graphics_SetupCommandBuffers()
 
 	if (m_GraphicsCommandPool->IsValid())
 	{
-		m_DrawCommandBuffers = m_GraphicsCommandPool->AllocateCommandBuffers(SwapChain->GetFrameCount(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+		m_GraphicsDrawCommandBuffers = m_GraphicsCommandPool->AllocateCommandBuffers(SwapChain->GetFrameCount(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	}
 
 	bool result = true;
 
-	for (const auto& cmdBuffer : m_DrawCommandBuffers)
+	for (const auto& cmdBuffer : m_GraphicsDrawCommandBuffers)
 	{
 		if (!result)
 		{
@@ -149,46 +183,6 @@ bool vkpc::VulkanRenderer::Graphics_SetupCommandBuffers()
 	}
 
 	return result;
-}
-
-bool vkpc::VulkanRenderer::Graphics_SetupDescriptorPool()
-{
-	m_DescriptorPool = new VulkanDescriptorPool(m_Device);
-	m_DescriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1); //we need 1 ubo.
-	m_DescriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2); //we need 2 textures.
-	m_DescriptorPool->SetMaxSets(2);
-
-	return m_DescriptorPool->IsValid();
-}
-
-bool vkpc::VulkanRenderer::Graphics_SetupDescriptorSetLayout()
-{
-	m_DescriptorSetLayout = new VulkanDescriptorSetLayout(m_Device);
-	m_DescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
-	m_DescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
-
-	VKPC_ASSERT(m_DescriptorSetLayout->Construct());
-
-	return m_DescriptorSetLayout->IsValid();
-}
-
-bool vkpc::VulkanRenderer::Graphics_SetupDescriptorSet()
-{
-	m_DescriptorSet = new VulkanDescriptorSet(m_Device, m_DescriptorPool);
-	m_DescriptorSet->AddLayout(m_DescriptorSetLayout);
-	VKPC_ASSERT(m_DescriptorSet->Construct());
-
-	if (!m_DescriptorSet->IsValid())
-	{
-		return false;
-	}
-
-	m_DescriptorSet->ClearDescriptors();
-	//m_DescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
-
-	m_DescriptorSet->UpdateDescriptorSet();
-
-	return m_GraphicsPipeline->IsValid();
 }
 
 bool vkpc::VulkanRenderer::Graphics_SetupDepthStencil()
@@ -225,7 +219,7 @@ bool vkpc::VulkanRenderer::Graphics_SetupDepthStencil()
 	subresourceRange.baseArrayLayer = 0;
 	subresourceRange.layerCount = 1;
 	subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-	
+
 	//only include stencil aspect mask on platforms that support it.
 	if (m_Device->GetDepthFormat() > VK_FORMAT_D16_UNORM_S8_UINT)
 	{
@@ -286,54 +280,6 @@ bool vkpc::VulkanRenderer::Graphics_BuildRenderPass()
 	return m_RenderPass->IsValid();
 }
 
-bool vkpc::VulkanRenderer::Graphics_BuildPipeline()
-{
-	m_GraphicsPipeline = new VulkanGraphicsPipeline(m_Device, m_GraphicsPipelineCache);
-
-	VulkanVertexInputState* state = new VulkanVertexInputState();
-	//state->AddVertexAttributeBinding(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX)
-	//state->AddVertexAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position))
-	//state->AddVertexAttributeDescription(0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv))
-	//state->AddVertexAttributeDescription(0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal))
-
-	m_GraphicsPipeline->SetVertexInputStage(state);
-
-	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
-	colorBlendAttachment.colorWriteMask = 0xf;
-	colorBlendAttachment.blendEnable = VK_FALSE;
-	m_GraphicsPipeline->SetColorBlendStage({ colorBlendAttachment });
-
-	m_GraphicsPipeline->SetInputAssemblerStage(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
-	m_GraphicsPipeline->SetRasterizationStage(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
-	m_GraphicsPipeline->SetDepthStencilStage(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
-	m_GraphicsPipeline->SetViewportStage(1, 1, 0);
-	m_GraphicsPipeline->SetMultisampleStage(VK_SAMPLE_COUNT_1_BIT, 0);
-	m_GraphicsPipeline->SetDynamicStage({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR });
-
-	VKPC_ASSERT(m_GraphicsPipeline->ConstructPipeline());
-	
-	delete state;
-
-	return m_GraphicsPipeline->IsValid();
-}
-
-bool vkpc::VulkanRenderer::Graphics_BuildPipelineCache()
-{
-	m_GraphicsPipelineCache = new VulkanPipelineCache(m_Device);
-
-	return m_GraphicsPipelineCache->IsValid();
-}
-
-bool vkpc::VulkanRenderer::Graphics_BuildPipelineLayout()
-{
-	//Create Pipeline Layout.
-	m_PipelineLayout = new VulkanPipelineLayout(m_Device);
-	m_PipelineLayout->AddDescriptorSetLayout(m_DescriptorSetLayout);
-	VKPC_ASSERT(m_PipelineLayout->Construct());
-
-	return m_PipelineLayout->IsValid();
-}
-
 bool vkpc::VulkanRenderer::Graphics_BuildFramebuffers()
 {
 	VkExtent2D swapChainExtent = m_SwapChain->GetExtent();
@@ -380,6 +326,8 @@ void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 	for (int32 i = 0; i < m_DrawCommandBuffers.size(); ++i)
 	{
 		VulkanCommandBuffer* commandBuffer = m_DrawCommandBuffers[i];
+		VulkanFrameBuffer* presentFrameBuffer = m_FrameBuffers[i];
+		VulkanImage* currentSwapChainImage = m_SwapChain->GetSwapChainImage(i);
 		commandBuffer->Begin();
 
 		//Aquire a lock on the SSBO device memory from the compute pipeline.
@@ -412,6 +360,26 @@ void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 		VkDeviceSize offsets[1] = { 0 };
 
 		//Draw stuff here.
+		VkOffset3D blitSize{ width , height, 1 };
+
+		VkImageBlit imageBlitRegion{};
+		imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.srcSubresource.layerCount = 1;
+		imageBlitRegion.srcOffsets[1] = blitSize;
+		imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.dstSubresource.layerCount = 1;
+		imageBlitRegion.dstOffsets[1] = blitSize;
+
+		/*	vkCmdBlitImage(
+				commandBuffer->GetVkCommandBuffer(),
+				computeResult,
+				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				m_SwapChain->GetSwapChainImage(i)->GetVkImage(),
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				1,
+				&imageBlitRegion,
+				VK_FILTER_LINEAR);*/
+
 
 		m_RenderPass->End();
 
@@ -439,21 +407,6 @@ void vkpc::VulkanRenderer::DismantleGraphics()
 		delete frameBuffer;
 	}
 
-	//& VulkanRenderer::Graphics_BuildPipeline,
-	delete m_GraphicsPipeline;
-	//& VulkanRenderer::Graphics_BuildPipelineLayout,
-	delete m_GraphicsPipelineLayout;
-	//& VulkanRenderer::Graphics_BuildPipelineCache,
-	delete m_GraphicsPipelineCache;		
-	
-	//& VulkanRenderer::Graphics_SetupDescriptorSetLayout,
-	//& VulkanRenderer::Graphics_SetupDescriptorPool,
-	delete m_DescriptorSet; // this wont free the vk resources because the pools does that!
-	delete m_DescriptorPool;
-	
-	//& VulkanRenderer::Graphics_SetupDescriptorSet,
-	delete m_DescriptorSetLayout;
-	
 	//& VulkanRenderer::Graphics_SetupDepthStencil,
 	delete m_DepthStencilImageView;
 	delete m_DepthStencilImage;
@@ -466,7 +419,7 @@ void vkpc::VulkanRenderer::DismantleGraphics()
 	delete m_GraphicsRenderCompleteSemaphore;
 
 	//& VulkanRenderer::Graphics_SetupCommandBuffers,
-	for (const auto& cmdBuffer : m_DrawCommandBuffers)
+	for (const auto& cmdBuffer : m_GraphicsDrawCommandBuffers)
 	{
 		delete cmdBuffer;
 	}
@@ -476,11 +429,185 @@ void vkpc::VulkanRenderer::DismantleGraphics()
 
 bool vkpc::VulkanRenderer::SetupCompute()
 {
+	bool result = true;
+
+	std::vector<VulkanRenderer::VkRendererInitFunction> functions({
+		&VulkanRenderer::Compute_SetupDescriptorSetLayout,
+		&VulkanRenderer::Compute_SetupDescriptorSets,
+		&VulkanRenderer::Compute_SetupShaders,
+		&VulkanRenderer::Compute_SetupPipelineLayouts,
+		&VulkanRenderer::Compute_SetupPipelines,
+		&VulkanRenderer::Compute_SetupCommandBuffers,
+		&VulkanRenderer::Compute_SetupSyncPrimitives,
+		});
+
+	return ExecuteRenderInitFunctions(functions);
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupDescriptorSetLayout()
+{
+	m_ComputeDepthDescriptorSetLayout = new VulkanDescriptorSetLayout(m_Device);
+	m_ComputeDepthDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	m_ComputeDepthDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+	VKPC_ASSERT(m_ComputeDepthDescriptorSetLayout->Construct());
+	VKPC_ASSERT(m_ComputeDepthDescriptorSetLayout->IsValid());
+
+	m_ComputeRenderDescriptorSetLayout = new VulkanDescriptorSetLayout(m_Device);
+	m_ComputeRenderDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	m_ComputeRenderDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+	VKPC_ASSERT(m_ComputeRenderDescriptorSetLayout->Construct());
+	VKPC_ASSERT(m_ComputeRenderDescriptorSetLayout->IsValid());
+
+	m_ComputeResolveDescriptorSetLayout = new VulkanDescriptorSetLayout(m_Device);
+	m_ComputeResolveDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	m_ComputeResolveDescriptorSetLayout->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 1);
+	VKPC_ASSERT(m_ComputeResolveDescriptorSetLayout->Construct());
+	VKPC_ASSERT(m_ComputeResolveDescriptorSetLayout->IsValid());
+
+	return true;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupDescriptorSets()
+{
+	m_ComputeDepthDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
+	m_ComputeDepthDescriptorSet->AddLayout(m_ComputeDepthDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeDepthDescriptorSet->Construct());
+	VKPC_ASSERT(m_ComputeDepthDescriptorSet->IsValid());
+	m_ComputeDepthDescriptorSet->ClearDescriptors();
+	//m_ComputeDepthDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	m_ComputeDepthDescriptorSet->UpdateDescriptorSet();
+
+	m_ComputeRenderDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
+	m_ComputeRenderDescriptorSet->AddLayout(m_ComputeRenderDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeRenderDescriptorSet->Construct());
+	VKPC_ASSERT(m_ComputeRenderDescriptorSet->IsValid());
+	m_ComputeRenderDescriptorSet->ClearDescriptors();
+	//m_ComputeRenderDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	m_ComputeRenderDescriptorSet->UpdateDescriptorSet();
+
+	m_ComputeResolveDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
+	m_ComputeResolveDescriptorSet->AddLayout(m_ComputeResolveDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeResolveDescriptorSet->Construct());
+	VKPC_ASSERT(m_ComputeResolveDescriptorSet->IsValid());
+	m_ComputeResolveDescriptorSet->ClearDescriptors();
+	//m_ComputeResolveDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	m_ComputeResolveDescriptorSet->UpdateDescriptorSet();
+
+	return true;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupShaders()
+{
 	return false;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupPipelineLayouts()
+{
+	m_ComputeDepthPipelineLayout = new VulkanPipelineLayout(m_Device);
+	m_ComputeDepthPipelineLayout->AddDescriptorSetLayout(m_ComputeDepthDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeDepthPipelineLayout->Construct());
+
+	m_ComputeRenderPipelineLayout = new VulkanPipelineLayout(m_Device);
+	m_ComputeRenderPipelineLayout->AddDescriptorSetLayout(m_ComputeRenderDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeRenderPipelineLayout->Construct());
+
+	m_ComputeResolvePipelineLayout = new VulkanPipelineLayout(m_Device);
+	m_ComputeResolvePipelineLayout->AddDescriptorSetLayout(m_ComputeResolveDescriptorSetLayout);
+	VKPC_ASSERT(m_ComputeResolvePipelineLayout->Construct());
+
+	return true;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupPipelines()
+{
+	VulkanShaderStage* depthStage = new VulkanShaderStage(m_ComputeDepthShader, VK_SHADER_STAGE_COMPUTE_BIT);
+	VulkanShaderStage* renderStage = new VulkanShaderStage(m_ComputeRenderShader, VK_SHADER_STAGE_COMPUTE_BIT);
+	VulkanShaderStage* resolveStage = new VulkanShaderStage(m_ComputeResolveShader, VK_SHADER_STAGE_COMPUTE_BIT);
+
+	m_ComputeDepthPipeline = new VulkanComputePipeline(m_Device, m_SharedPipelineCache);
+	m_ComputeDepthPipeline->SetShaderStage(depthStage);
+	m_ComputeDepthPipeline->SetLayout(m_ComputeDepthPipelineLayout);
+	VKPC_ASSERT(m_ComputeDepthPipeline->ConstructPipeline());
+
+	m_ComputeRenderPipeline = new VulkanComputePipeline(m_Device, m_SharedPipelineCache);
+	m_ComputeRenderPipeline->SetShaderStage(renderStage);
+	m_ComputeRenderPipeline->SetLayout(m_ComputeRenderPipelineLayout);
+	VKPC_ASSERT(m_ComputeRenderPipeline->ConstructPipeline());
+
+	m_ComputeResolvePipeline = new VulkanComputePipeline(m_Device, m_SharedPipelineCache);
+	m_ComputeResolvePipeline->SetShaderStage(resolveStage);
+	m_ComputeResolvePipeline->SetLayout(m_ComputeResolvePipelineLayout);
+	VKPC_ASSERT(m_ComputeResolvePipeline->ConstructPipeline());
+
+	delete resolveStage;
+	delete renderStage;
+	delete depthStage;
+
+	return true;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupCommandBuffers()
+{
+	m_ComputeCommandPool = new VulkanCommandPool(m_Device, m_Device->GetQueueFamilyIndices().computeFamily.value());
+
+	VKPC_ASSERT(m_ComputeCommandPool->IsValid());
+
+	m_ComputeCommandBuffers = m_ComputeCommandPool->AllocateCommandBuffers(m_SwapChain->GetFrameCount(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+	return true;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupSyncPrimitives()
+{
+	m_ComputeReadySemaphore = new VulkanSemaphore(m_Device);
+	m_ComputeRenderCompleteSemaphore = new VulkanSemaphore(m_Device);
+
+	return true;
+}
+
+void vkpc::VulkanRenderer::Compute_RecordCommandBuffers()
+{
+
 }
 
 void vkpc::VulkanRenderer::DismantleCompute()
 {
+	//&VulkanRenderer::Compute_SetupSyncPrimitives,
+	delete m_ComputeRenderCompleteSemaphore;
+	delete m_ComputeReadySemaphore;
+
+	//&VulkanRenderer::Compute_SetupCommandBuffers,
+	for (const auto& cmdBuffer : m_ComputeCommandBuffers)
+	{
+		delete cmdBuffer;
+	}
+
+	delete m_ComputeCommandPool;
+
+	//&VulkanRenderer::Compute_SetupPipelines,
+	delete m_ComputeResolvePipeline;
+	delete m_ComputeRenderPipeline;
+	delete m_ComputeDepthPipeline;
+
+	//&VulkanRenderer::Compute_SetupPipelineLayouts,
+	delete m_ComputeResolvePipelineLayout;
+	delete m_ComputeRenderPipelineLayout;
+	delete m_ComputeDepthPipelineLayout;
+
+	//&VulkanRenderer::Compute_SetupShaders,
+	delete m_ComputeResolveShader;
+	delete m_ComputeRenderShader;
+	delete m_ComputeDepthShader;
+
+	//&VulkanRenderer::Compute_SetupDescriptorSets,
+	delete m_ComputeResolveDescriptorSet;
+	delete m_ComputeRenderDescriptorSet;
+	delete m_ComputeDepthDescriptorSet;
+
+	//&VulkanRenderer::Compute_SetupDescriptorSetLayout,
+	delete m_ComputeResolveDescriptorSetLayout;
+	delete m_ComputeRenderDescriptorSetLayout;
+	delete m_ComputeDepthDescriptorSetLayout;
 }
 
 bool vkpc::VulkanRenderer::ExecuteRenderInitFunctions(const std::vector<VkRendererInitFunction>& functions, bool stopAtFailure)
