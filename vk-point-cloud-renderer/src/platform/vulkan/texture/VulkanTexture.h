@@ -11,35 +11,29 @@ namespace vkpc {
 		VulkanTexture(class VulkanDevice* device);
 		~VulkanTexture();
 
-		/*
-			Each derived class needs to implement the following functions.
-		*/
 		virtual bool CreateImage() = 0;
-		virtual bool CreateSampler() = 0;
 		virtual bool CreateImageView() = 0;
-		virtual bool CreateImageLayout() = 0;
-		virtual bool CreateDescriptorInfo() = 0;
+		virtual bool CreateSampler() = 0;
 
-		void DestroyImage();
-		void DestroySampler();
-		void DestroyImageView();
+		virtual void DestroyImage();
+		virtual void DestroySampler();
+		virtual void DestroyImageView();
 
 	public:
-		VkImage GetImage();
 		VkImageLayout GetImageLayout();
-		VkSampler GetSampler();
-		VkImageView GetImageView();
-		VkDescriptorImageInfo GetDescriptorInfo();		
+
+		class VulkanImage* GetImage();
+		class VulkanImageView GetImageView();
+		class VulkanSampler* GetSampler();
 
 	private:
 		class VulkanDevice* m_OwningDevice;
-		VkDeviceMemory m_DeviceMemory;
+		
+		class VulkanImage* m_Image;
+		class VulkanImageView* m_View;
+		class VulkanSampler* m_Sampler;
 
-		VkImage m_Image;
-		VkImageView m_View;
-		VkSampler m_Sampler;
 		VkImageLayout m_ImageLayout;
-		VkDescriptorImageInfo m_DescriptorInfo;
 
 		uint32_t m_Width;
 		uint32_t m_Height;

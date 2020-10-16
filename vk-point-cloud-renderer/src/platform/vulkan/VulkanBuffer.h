@@ -8,22 +8,20 @@ namespace vkpc {
 	class VulkanBuffer : public VulkanDeviceResource
 	{
 	public:
-		VulkanBuffer(class VulkanDevice* device, size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE, VkBufferCreateFlags createFlags = -1);
+		VulkanBuffer(class VulkanDevice* device);
 		~VulkanBuffer();
 
 		VkBuffer GetVkBuffer();
-		size_t GetSize() const;
-
 		VkDescriptorBufferInfo GetDescriptorInfo();
-	
-		VkSharingMode GetSharingMode() const;
+
+		bool Construct();
+		void Demolish(bool freeMemory = true);
 
 		bool FillBuffer(void* block, size_t size, VkMemoryPropertyFlags properties);
 
-
 	private:
 		bool CreateBuffer();
-		void DestroyBuffer();
+		void DestroyBuffer(bool freeMemory);
 
 		bool AllocateMemory(VkMemoryPropertyFlags properties);
 		void FreeMemory();
@@ -35,13 +33,12 @@ namespace vkpc {
 	private:
 		class VulkanDevice* m_OwningDevice;
 
-		size_t m_Size;
-
 		VkDescriptorBufferInfo m_DescriptorInfo;
 
-		VkBufferCreateFlags m_CreateFlags;
-		VkBufferUsageFlags m_UsageFlags;
-		VkSharingMode m_SharingMode;		
+		VkBufferCreateFlags m_Flags;
+		VkDeviceSize m_Size;
+		VkBufferUsageFlags m_Usage;
+		VkSharingMode m_SharingMode;
 
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_DeviceMemory;

@@ -22,7 +22,10 @@ namespace vkpc {
 		*/
 		void ClearDescriptors();
 		void AddWriteDescriptor(VkDescriptorType type, uint32_t binding, class VulkanTexture* texture, uint32_t descriptorCount = 1);
+		void AddWriteDescriptors(VkDescriptorType type, std::vector<class VulkanTexture*> textures, uint32_t initialBinding = 0);
+
 		void AddWriteDescriptor(VkDescriptorType type, uint32_t binding, class VulkanBuffer* buffer, uint32_t descriptorCount = 1);
+		void AddWriteDescriptors(VkDescriptorType type, std::vector<class VulkanBuffer*> buffers, uint32_t initialBinding = 0);
 		
 		//void AddCopyDescriptor(); // TO-DO IMPLEMENT!
 		

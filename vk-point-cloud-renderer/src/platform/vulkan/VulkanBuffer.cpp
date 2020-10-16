@@ -2,20 +2,14 @@
 
 #include "platform/vulkan/VulkanDevice.h"
 
-vkpc::VulkanBuffer::VulkanBuffer(VulkanDevice* device, size_t size, VkBufferUsageFlags usageFlags, VkSharingMode sharingMode, VkBufferCreateFlags createFlags)
-	: m_OwningDevice(device), m_Size(size), m_UsageFlags(usageFlags), m_SharingMode(sharingMode), m_CreateFlags(createFlags), m_DeviceMemory(VK_NULL_HANDLE)
+vkpc::VulkanBuffer::VulkanBuffer(VulkanDevice* device)
+	: m_OwningDevice(device), m_Buffer(VK_NULL_HANDLE), m_Flags(VK_FLAGS_NONE), m_Size(0), m_DeviceMemory(VK_NULL_HANDLE)
 {
-	if (!CreateBuffer())
-	{
-		VKPC_LOG_ERROR("Failed to create buffer!");
-		m_IsValid = false;
-	}
 }
 
 vkpc::VulkanBuffer::~VulkanBuffer()
-{	
-	DestroyBuffer();
-	FreeMemory();
+{
+	DestroyBuffer(true);
 }
 
 VkBuffer vkpc::VulkanBuffer::GetVkBuffer()
@@ -23,32 +17,31 @@ VkBuffer vkpc::VulkanBuffer::GetVkBuffer()
 	return m_Buffer;
 }
 
-size_t vkpc::VulkanBuffer::GetSize() const
-{
-	return m_Size;
-}
-
 VkDescriptorBufferInfo vkpc::VulkanBuffer::GetDescriptorInfo()
 {
 	return m_DescriptorInfo;
 }
 
-VkSharingMode vkpc::VulkanBuffer::GetSharingMode() const
+bool vkpc::VulkanBuffer::Construct()
 {
-	return m_SharingMode;
+	return false;
+}
+
+void vkpc::VulkanBuffer::Demolish(bool freeMemory)
+{
 }
 
 bool vkpc::VulkanBuffer::FillBuffer(void* block, size_t size, VkMemoryPropertyFlags properties)
 {
 	VKPC_ASSERT(size == m_Size);
-	VKPC_ASSERT(IsValid()); // definitely want this one!
+	VKPC_ASSERT(IsValid());
 
 	if (!AllocateMemory(properties))
 	{
 		VKPC_LOG_ERROR("Failed to allocate memory to buffer!");
 		return false;
 	}
-	
+
 	if (vkBindBufferMemory(m_OwningDevice->GetLogicalDevice(), m_Buffer, m_DeviceMemory, 0) != VK_SUCCESS)
 	{
 		VKPC_LOG_ERROR("Failed to bind allocated memory to buffer!");
@@ -57,7 +50,7 @@ bool vkpc::VulkanBuffer::FillBuffer(void* block, size_t size, VkMemoryPropertyFl
 
 	void* data;
 	vkMapMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory, 0, m_Size, 0, &data);
-	memcpy(data, block, size);	
+	memcpy(data, block, size);
 	vkUnmapMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory);
 
 	return true;
@@ -65,20 +58,18 @@ bool vkpc::VulkanBuffer::FillBuffer(void* block, size_t size, VkMemoryPropertyFl
 
 bool vkpc::VulkanBuffer::CreateBuffer()
 {
+	VKPC_ASSERT(m_Size > 0);
+
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.flags = m_Flags;
 	bufferInfo.size = m_Size;
-	bufferInfo.usage = m_UsageFlags;
+	bufferInfo.usage = m_Usage;
 	bufferInfo.sharingMode = m_SharingMode;
 
-	//Only create flags are technically optional.
-	if (m_CreateFlags != -1)
-	{
-		bufferInfo.flags = m_SharingMode;
-	}
-
 	if (vkCreateBuffer(m_OwningDevice->GetLogicalDevice(), &bufferInfo, nullptr, &m_Buffer) != VK_SUCCESS) {
-		VKPC_LOG_ERROR("failed to create vertex buffer!");
+		VKPC_LOG_ERROR("failed to create buffer!");
+		m_IsValid = false;
 		return false;
 	}
 
@@ -88,17 +79,16 @@ bool vkpc::VulkanBuffer::CreateBuffer()
 	return true;
 }
 
-void vkpc::VulkanBuffer::DestroyBuffer()
+void vkpc::VulkanBuffer::DestroyBuffer(bool freeMemory)
 {
-	if (IsActive())
+	if (m_Buffer != VK_NULL_HANDLE)
 	{
-		if (m_Buffer)
-		{
-			vkDestroyBuffer(m_OwningDevice->GetLogicalDevice(), m_Buffer, nullptr);
-		}
+		vkDestroyBuffer(m_OwningDevice->GetLogicalDevice(), m_Buffer, nullptr);
+	}
 
-		//Make sure it only ever gets cleaned up once.
-		m_IsActive = false;
+	if (freeMemory)
+	{
+		FreeMemory();
 	}
 }
 
@@ -122,10 +112,16 @@ bool vkpc::VulkanBuffer::AllocateMemory(VkMemoryPropertyFlags properties)
 
 void vkpc::VulkanBuffer::FreeMemory()
 {
-	if (m_DeviceMemory)
+	if (IsActive())
 	{
-		vkFreeMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory, nullptr);
-		m_DeviceMemory = VK_NULL_HANDLE;
+		if (m_DeviceMemory != VK_NULL_HANDLE)
+		{
+			vkFreeMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory, nullptr);
+			m_DeviceMemory = VK_NULL_HANDLE;
+		}
+
+		//Make sure it only ever gets cleaned up once.
+		m_IsActive = false;
 	}
 }
 

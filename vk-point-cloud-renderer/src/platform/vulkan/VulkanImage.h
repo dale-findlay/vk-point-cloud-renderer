@@ -16,17 +16,20 @@ namespace vkpc {
 		~VulkanImage();
 
 		VkImage GetVkImage();
-
-		//When constructing the image yourself you can use these functions.
-
-		void SetImageType(VkImageType type);
+		
+		void SetFlags(VkImageCreateFlags flags);
+		void SetImageType(VkImageType imagetype);
 		void SetFormat(VkFormat format);
 		void SetExtent(VkExtent3D extent);
-		void SetMipLevels(uint32 mipLevels);
-		void SetArrayLayers(uint32 arrayLayers);
+		void SetMipLevels(uint32_t miplevels);
+		void SetArrayLayers(uint32_t arraylayers);
 		void SetSamples(VkSampleCountFlagBits samples);
 		void SetTiling(VkImageTiling tiling);
-		void SetUsage(VkImageUsageFlags imageUsageFlags);
+		void SetUsage(VkImageUsageFlags usage);
+		void SetSharingMode(VkSharingMode sharingmode);
+		void SetInitialLayout(VkImageLayout initiallayout);
+
+		void AddQueueFamilyIndex(uint32 index);
 
 		bool Construct();
 
@@ -34,13 +37,29 @@ namespace vkpc {
 		bool CreateImage();
 		void DestroyImage();
 
+		bool AllocateMemory(VkMemoryPropertyFlags properties);
+		void FreeMemory();
+
 	private:
 		bool m_OwnResources; //sometimes we might not want to cleanup the vk resource when this object is deleted.
 
 		class VulkanDevice* m_OwningDevice;	
 		VkImage m_Image;
 
-		VkImageCreateInfo m_ImageCreateInfo;
+		std::vector<uint32_t> m_QueueFamilyIndices;
+
+		VkImageCreateFlags m_Flags;
+		VkImageType m_ImageType;
+		VkFormat m_Format;
+		VkExtent3D m_Extent;
+		uint32_t m_MipLevels;
+		uint32_t m_ArrayLayers;
+		VkSampleCountFlagBits m_Samples;
+		VkImageTiling m_Tiling;
+		VkImageUsageFlags m_Usage;
+		VkSharingMode m_SharingMode;
+		VkImageLayout m_InitialLayout;
+
 		VkDeviceMemory m_ImageDeviceMemory;
 	};
 }

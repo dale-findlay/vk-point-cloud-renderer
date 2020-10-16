@@ -47,6 +47,17 @@ void vkpc::VulkanDescriptorSet::AddWriteDescriptor(VkDescriptorType type, uint32
 	m_WriteDescriptors.push_back(writeDescriptorSet);
 }
 
+void vkpc::VulkanDescriptorSet::AddWriteDescriptors(VkDescriptorType type, std::vector<VulkanTexture*> textures, uint32_t initialBinding)
+{
+	uint32 binding = initialBinding;
+
+	for (const auto& texture : textures)
+	{
+		AddWriteDescriptor(type, binding, texture);
+		binding++;
+	}
+}
+
 void vkpc::VulkanDescriptorSet::AddWriteDescriptor(VkDescriptorType type, uint32_t binding, VulkanBuffer* buffer, uint32_t descriptorCount)
 {
 	VkWriteDescriptorSet writeDescriptorSet{};
@@ -58,6 +69,17 @@ void vkpc::VulkanDescriptorSet::AddWriteDescriptor(VkDescriptorType type, uint32
 	writeDescriptorSet.descriptorCount = descriptorCount;
 
 	m_WriteDescriptors.push_back(writeDescriptorSet);
+}
+
+void vkpc::VulkanDescriptorSet::AddWriteDescriptors(VkDescriptorType type, std::vector<VulkanBuffer*> buffers, uint32_t initialBinding)
+{
+	uint32 binding = initialBinding;
+
+	for(const auto& buffer : buffers)
+	{
+		AddWriteDescriptor(type, binding, buffer);
+		binding++;
+	}
 }
 
 bool vkpc::VulkanDescriptorSet::UpdateDescriptorSet()

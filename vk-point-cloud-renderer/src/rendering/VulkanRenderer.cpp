@@ -14,6 +14,9 @@
 #include "platform/vulkan/VulkanImage.h"
 #include "platform/vulkan/VulkanImageView.h"
 
+#include "platform/vulkan/texture/VulkanTexture.h"
+#include "platform/vulkan/texture/VulkanTexture2D.h"
+
 #include "platform/vulkan/synchronization/VulkanSemaphore.h"
 #include "platform/vulkan/synchronization/VulkanFence.h"
 
@@ -131,7 +134,36 @@ bool vkpc::VulkanRenderer::Shared_BuildPipelineCache()
 
 bool vkpc::VulkanRenderer::Shared_SetupDescriptorPool()
 {
-	return false;
+	m_SharedDescriptorPool = new VulkanDescriptorPool(m_Device);
+	
+	/*
+	*	Define our descriptor pool.
+		
+		Which ssbo and how many of the 3 shaders it appears in.
+	*/
+	const uint32 pointDataCount = 3;
+	const uint32 depthBufferDataCount = 3;
+	const uint32 frameBufferData = 2;
+	const uint32 rgData = 2;
+	const uint32 baData = 2;
+	
+	uint32 totalSSBOs = pointDataCount + depthBufferDataCount + frameBufferData + rgData + baData;
+	m_SharedDescriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, totalSSBOs);
+
+	const uint32 uboCount = 2;
+	m_SharedDescriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uboCount);
+
+	const uint32 siCount = 1;
+	m_SharedDescriptorPool->AddDescriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, siCount); // aka uimage
+	
+	//one for each compute pipeline.
+	const uint32 maxSets = 3;
+
+	m_SharedDescriptorPool->SetMaxSets(maxSets);
+
+	VKPC_ASSERT(m_SharedDescriptorPool->Construct());
+
+	return true;
 }
 
 void vkpc::VulkanRenderer::DismantleShared()
@@ -369,30 +401,27 @@ void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 		vkCmdSetScissor(currentCommandBuffer->GetVkCommandBuffer(), 0, 1, &scissor);
 
 		VkDeviceSize offsets[1] = { 0 };
+	
+		//Blit our compute result image to our swapchain image.
+		VkOffset3D blitSize{ width , height, 1 };
 
-		
-		//Blit our resulting
-		vkCmdCopyBufferToImage(currentCommandBuffer->GetVkCommandBuffer(), )
+		VkImageBlit imageBlitRegion{};
+		imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.srcSubresource.layerCount = 1;
+		imageBlitRegion.srcOffsets[1] = blitSize;
+		imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBlitRegion.dstSubresource.layerCount = 1;
+		imageBlitRegion.dstOffsets[1] = blitSize;
 
-		//VkOffset3D blitSize{ width , height, 1 };
-
-		//VkImageBlit imageBlitRegion{};
-		//imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		//imageBlitRegion.srcSubresource.layerCount = 1;
-		//imageBlitRegion.srcOffsets[1] = blitSize;
-		//imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		//imageBlitRegion.dstSubresource.layerCount = 1;
-		//imageBlitRegion.dstOffsets[1] = blitSize;
-
-		//	vkCmdBlitImage(
-		//		currentCommandBuffer->GetVkCommandBuffer(),
-		//		computeResult,
-		//		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		//		m_SwapChain->GetSwapChainImage(i)->GetVkImage(),
-		//		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		//		1,
-		//		&imageBlitRegion,
-		//		VK_FILTER_LINEAR);
+		vkCmdBlitImage(
+			currentCommandBuffer->GetVkCommandBuffer(),
+			m_ComputeResultTexture->GetImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			m_SwapChain->GetSwapChainImage(i)->GetVkImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&imageBlitRegion,
+			VK_FILTER_LINEAR);
 
 
 		vkCmdEndRenderPass(currentCommandBuffer->GetVkCommandBuffer());
@@ -483,28 +512,64 @@ bool vkpc::VulkanRenderer::Compute_SetupDescriptorSetLayout()
 
 bool vkpc::VulkanRenderer::Compute_SetupDescriptorSets()
 {
+	/*
+	* Depth
+	*/
 	m_ComputeDepthDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
 	m_ComputeDepthDescriptorSet->AddLayout(m_ComputeDepthDescriptorSetLayout);
 	VKPC_ASSERT(m_ComputeDepthDescriptorSet->Construct());
 	VKPC_ASSERT(m_ComputeDepthDescriptorSet->IsValid());
 	m_ComputeDepthDescriptorSet->ClearDescriptors();
-	//m_ComputeDepthDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	
+	m_ComputeDepthDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, m_ComputeTransformUBO); //ubo
+
+	std::vector<VulkanBuffer*> renderDepthSSBOBuffers({
+		m_ComputePointDataBuffer,	//0 - point_data
+		m_ComputeDepthBufferData,	//1 - depthbuffer_data
+		});
+	m_ComputeDepthDescriptorSet->AddWriteDescriptors(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, renderDepthSSBOBuffers);
+
 	m_ComputeDepthDescriptorSet->UpdateDescriptorSet();
 
+	/*
+	* Attribute
+	*/
 	m_ComputeRenderDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
 	m_ComputeRenderDescriptorSet->AddLayout(m_ComputeRenderDescriptorSetLayout);
 	VKPC_ASSERT(m_ComputeRenderDescriptorSet->Construct());
 	VKPC_ASSERT(m_ComputeRenderDescriptorSet->IsValid());
 	m_ComputeRenderDescriptorSet->ClearDescriptors();
-	//m_ComputeRenderDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	
+	m_ComputeRenderDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, m_ComputeTransformUBO); //ubo
+
+	std::vector<VulkanBuffer*> renderAttributeSSBOBuffers({
+		m_ComputePointDataBuffer,	//0 - point_data
+		m_ComputeFrameBufferData,	//1 - framebuffer_data
+		m_ComputeDepthBufferData,	//2 - depthbuffer_data
+		m_ComputePointRGBuffer,		//3 - rg_data
+		m_ComputePointBABuffer		//4 - ba_data
+		});
+	m_ComputeRenderDescriptorSet->AddWriteDescriptors(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, renderAttributeSSBOBuffers);
+
 	m_ComputeRenderDescriptorSet->UpdateDescriptorSet();
 
+	/*
+	* Resolve
+	*/
 	m_ComputeResolveDescriptorSet = new VulkanDescriptorSet(m_Device, m_SharedDescriptorPool);
 	m_ComputeResolveDescriptorSet->AddLayout(m_ComputeResolveDescriptorSetLayout);
 	VKPC_ASSERT(m_ComputeResolveDescriptorSet->Construct());
 	VKPC_ASSERT(m_ComputeResolveDescriptorSet->IsValid());
 	m_ComputeResolveDescriptorSet->ClearDescriptors();
-	//m_ComputeResolveDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &textureColorMap.descriptor);
+	std::vector<VulkanBuffer*> resolveSSBOBuffers({
+		m_ComputePointDataBuffer,	//0 - point_data
+		m_ComputeFrameBufferData,	//1 - framebuffer_data
+		m_ComputeDepthBufferData,	//2 - depthbuffer_data
+		m_ComputePointRGBuffer,		//3 - rg_data
+		m_ComputePointBABuffer		//4 - ba_data
+	});
+	m_ComputeResolveDescriptorSet->AddWriteDescriptors(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, resolveSSBOBuffers);
+	m_ComputeResolveDescriptorSet->AddWriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, m_ComputeResultTexture); //uOutput
 	m_ComputeResolveDescriptorSet->UpdateDescriptorSet();
 
 	return true;
