@@ -31,6 +31,7 @@
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanComputePipeline.cpp" />
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanShaderStage.cpp" />
     <ClCompile Include="src\platform\vulkan\pipeline\VulkanVertexInputState.cpp" />
+    <ClCompile Include="src\platform\vulkan\texture\VulkanSampler.cpp" />
     <ClCompile Include="src\platform\vulkan\texture\VulkanTexture.cpp" />
     <ClCompile Include="src\platform\vulkan\command\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\platform\vulkan\command\VulkanCommandPool.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanComputePipeline.h" />
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanShaderStage.h" />
     <ClInclude Include="src\platform\vulkan\pipeline\VulkanVertexInputState.h" />
+    <ClInclude Include="src\platform\vulkan\texture\VulkanSampler.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTexture.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTexture2D.h" />
     <ClInclude Include="src\platform\vulkan\texture\VulkanTextureCubeMap.h" />
