@@ -311,24 +311,37 @@ bool vkpc::VulkanRenderer::Graphics_BuildFramebuffers()
 
 void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 {
-	m_RenderPass->SetRenderArea();
-
-	VkClearValue clearValues[2];
-	clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };;
-	clearValues[1].depthStencil = { 1.0f, 0 };
-
-	m_RenderPass->SetClearValues(clearValues);
-
 	platform::PlatformWindow* window = m_Application->GetSubSystem<platform::PlatformWindow>();
 	uint32 width = window->GetWindowWidth();
 	uint32 height = window->GetWindowHeight();
 
-	for (int32 i = 0; i < m_DrawCommandBuffers.size(); ++i)
+	VkRect2D renderArea;
+	renderArea.offset.x = 0;
+	renderArea.offset.y = 0;
+	renderArea.extent.width = width;
+	renderArea.extent.height = height;
+
+	VkClearValue clearColor;
+	clearColor.color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+
+	VkClearValue depthStencil;
+	depthStencil.depthStencil = { 1.0f, 0 };
+
+	VkRenderPassBeginInfo renderPassBeginInfo = m_RenderPass->MakeBeginPassCreateInfo(renderArea, { clearColor , depthStencil });
+
+	for (int32 i = 0; i < m_GraphicsDrawCommandBuffers.size(); ++i)
 	{
-		VulkanCommandBuffer* commandBuffer = m_DrawCommandBuffers[i];
-		VulkanFrameBuffer* presentFrameBuffer = m_FrameBuffers[i];
+		VulkanCommandBuffer* currentCommandBuffer = m_GraphicsDrawCommandBuffers[i];
+		VulkanFrameBuffer* currentFrameBuffer = m_FrameBuffers[i];
 		VulkanImage* currentSwapChainImage = m_SwapChain->GetSwapChainImage(i);
-		commandBuffer->Begin();
+
+		currentCommandBuffer->Begin();
+
+
+		renderPassBeginInfo.framebuffer = currentFrameBuffer->GetVkFramebuffer();
+		vkCmdBeginRenderPass(currentCommandBuffer->GetVkCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		//At this point we should be able to aquire our 
 
 		//Aquire a lock on the SSBO device memory from the compute pipeline.
 		//VulkanPipelineBarrier computeToGraphics;
@@ -341,47 +354,48 @@ void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 		//computeToGraphics->AddBuffer(m_ComputeOuputSSBO);
 		//computeToGraphics->Execute(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_FLAGS_NONE);
 
-		m_RenderPass->Begin();
-
 		VkViewport viewport = {};
 		viewport.width = (float)width;
 		viewport.height = (float)height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer->GetVkCommandBuffer(), 0, 1, &viewport);
+		vkCmdSetViewport(currentCommandBuffer->GetVkCommandBuffer(), 0, 1, &viewport);
 
 		VkRect2D scissor{};
 		scissor.extent.width = width;
 		scissor.extent.height = height;
 		scissor.offset.x = 0;
 		scissor.offset.y = 0;
-		vkCmdSetScissor(commandBuffer->GetVkCommandBuffer(), 0, 1, &scissor);
+		vkCmdSetScissor(currentCommandBuffer->GetVkCommandBuffer(), 0, 1, &scissor);
 
 		VkDeviceSize offsets[1] = { 0 };
 
-		//Draw stuff here.
-		VkOffset3D blitSize{ width , height, 1 };
+		
+		//Blit our resulting
+		vkCmdCopyBufferToImage(currentCommandBuffer->GetVkCommandBuffer(), )
 
-		VkImageBlit imageBlitRegion{};
-		imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageBlitRegion.srcSubresource.layerCount = 1;
-		imageBlitRegion.srcOffsets[1] = blitSize;
-		imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageBlitRegion.dstSubresource.layerCount = 1;
-		imageBlitRegion.dstOffsets[1] = blitSize;
+		//VkOffset3D blitSize{ width , height, 1 };
 
-		/*	vkCmdBlitImage(
-				commandBuffer->GetVkCommandBuffer(),
-				computeResult,
-				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				m_SwapChain->GetSwapChainImage(i)->GetVkImage(),
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				1,
-				&imageBlitRegion,
-				VK_FILTER_LINEAR);*/
+		//VkImageBlit imageBlitRegion{};
+		//imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		//imageBlitRegion.srcSubresource.layerCount = 1;
+		//imageBlitRegion.srcOffsets[1] = blitSize;
+		//imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		//imageBlitRegion.dstSubresource.layerCount = 1;
+		//imageBlitRegion.dstOffsets[1] = blitSize;
+
+		//	vkCmdBlitImage(
+		//		currentCommandBuffer->GetVkCommandBuffer(),
+		//		computeResult,
+		//		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		//		m_SwapChain->GetSwapChainImage(i)->GetVkImage(),
+		//		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		//		1,
+		//		&imageBlitRegion,
+		//		VK_FILTER_LINEAR);
 
 
-		m_RenderPass->End();
+		vkCmdEndRenderPass(currentCommandBuffer->GetVkCommandBuffer());
 
 		//Release buffer memory back to the compute pipeline.
 
@@ -395,7 +409,7 @@ void vkpc::VulkanRenderer::Graphics_RecordCommandBuffers()
 		//graphicsToCompute->AddBuffer(m_ComputeOuputSSBO);
 		//graphicsToCompute->Execute(VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FLAGS_NONE);
 
-		commandBuffer->End();
+		currentCommandBuffer->End();
 	}
 }
 

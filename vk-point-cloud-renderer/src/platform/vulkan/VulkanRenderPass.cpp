@@ -1,9 +1,10 @@
 #include "VulkanRenderPass.h"
 
 #include "platform/vulkan/VulkanDevice.h"
+#include "platform/vulkan/VulkanFramebuffer.h"
 
 vkpc::VulkanRenderPass::VulkanRenderPass(VulkanDevice* device)
-	: m_Device(device), m_RenderPass(VK_NULL_HANDLE)
+	: m_Device(device), m_RenderPass(VK_NULL_HANDLE), m_FrameBuffer(VK_NULL_HANDLE)
 {}
 
 vkpc::VulkanRenderPass::~VulkanRenderPass()
@@ -40,6 +41,20 @@ void vkpc::VulkanRenderPass::AddDepthStencilAttachment(VkAttachmentDescription a
 	
 }
 
+void vkpc::VulkanRenderPass::MakeBeginPassCreateInfo(const VkRect2D& renderArea, const std::vector<VkClearValue>& clearValues)
+{
+}
+
+void vkpc::VulkanRenderPass::SetRenderArea(const VkRect2D& rectArea)
+{
+	m_RenderArea = VkRect2D(rectArea);
+}
+
+void vkpc::VulkanRenderPass::SetClearValues(const std::vector<VkClearValue>& clearValues)
+{
+	m_ClearColorValues = std::vector<VkClearValue>(clearValues);
+}
+
 void vkpc::VulkanRenderPass::AddSubpassDependency(VkSubpassDependency subpassDependency)
 {
 	m_SubPassDependencies.push_back(subpassDependency);
@@ -55,12 +70,18 @@ void vkpc::VulkanRenderPass::DemolishRenderPass()
 	DestroyRenderPass();
 }
 
-void vkpc::VulkanRenderPass::Begin()
+VkRenderPassBeginInfo vkpc::VulkanRenderPass::MakeBeginPassCreateInfo(const VkRect2D& renderArea, const std::vector<VkClearValue>& clearValues)
 {
-}
+	VkRenderPassBeginInfo m_RenderPassBeginInfo = {};
+	m_RenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	
+	m_RenderPassBeginInfo.renderPass = m_RenderPass;
+	m_RenderPassBeginInfo.renderArea = renderArea;
 
-void vkpc::VulkanRenderPass::End()
-{
+	m_RenderPassBeginInfo.clearValueCount = clearValues.size();
+	m_RenderPassBeginInfo.pClearValues = clearValues.data();
+
+	return m_RenderPassBeginInfo;
 }
 
 bool vkpc::VulkanRenderPass::CreateRenderPass()

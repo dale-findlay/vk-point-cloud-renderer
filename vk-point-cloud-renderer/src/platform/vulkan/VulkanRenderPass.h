@@ -16,13 +16,12 @@ namespace vkpc {
 		void AddColorAttachment(VkAttachmentDescription attachmentDescription, VkImageLayout layout);
 		void AddDepthStencilAttachment(VkAttachmentDescription attachmentDescription, VkImageLayout layout);
 		
+		VkRenderPassBeginInfo MakeBeginPassCreateInfo(const VkRect2D& renderArea, const std::vector<VkClearValue>& clearValues);
+
 		void AddSubpassDependency(VkSubpassDependency subpassDependency);
 
 		bool Construct();
 		void DemolishRenderPass();
-
-		void Begin();
-		void End();
 
 	protected:
 		bool CreateRenderPass();
@@ -37,7 +36,6 @@ namespace vkpc {
 		VkAttachmentReference m_ColorAttachmentRef;
 		VkAttachmentReference m_DepthStencilAttachmentRef;
 
-		std::vector<VkSubpassDependency> m_SubPassDependencies;
-
+		std::vector<VkSubpassDependency> m_SubPassDependencies;		
 	};
 }

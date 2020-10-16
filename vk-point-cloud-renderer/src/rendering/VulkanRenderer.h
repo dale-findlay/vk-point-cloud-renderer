@@ -79,6 +79,13 @@ namespace vkpc {
 		*/
 		class VulkanCommandPool* m_ComputeCommandPool;
 		std::vector<class VulkanCommandBuffer*> m_ComputeCommandBuffers; //still one for each swapchain frame.
+		class VulkanImage* m_ComputeResultImage;
+
+		class VulkanBuffer* m_ComputePointDataBuffer;
+		class VulkanBuffer* m_ComputeFrameBufferData;
+		class VulkanBuffer* m_ComputeDepthBufferData;
+		class VulkanBuffer* m_ComputePointDataBuffer;
+		class VulkanBuffer* m_ComputePointDataBuffer;
 
 		//Depth pre-pass
 		class VulkanShader* m_ComputeDepthShader;
