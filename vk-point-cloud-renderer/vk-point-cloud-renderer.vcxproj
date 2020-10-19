@@ -37,6 +37,7 @@
     <ClCompile Include="src\platform\vulkan\command\VulkanCommandPool.cpp" />
     <ClCompile Include="src\platform\vulkan\core\VulkanDeviceResource.cpp" />
     <ClCompile Include="src\platform\vulkan\core\VulkanSubObject.cpp" />
+    <ClCompile Include="src\platform\vulkan\texture\VulkanTexture2D.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanBuffer.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanContext.cpp" />
     <ClCompile Include="src\platform\vulkan\VulkanDevice.cpp" />

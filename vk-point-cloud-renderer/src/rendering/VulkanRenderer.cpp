@@ -487,6 +487,18 @@ bool vkpc::VulkanRenderer::SetupCompute()
 	return ExecuteRenderInitFunctions(functions);
 }
 
+bool vkpc::VulkanRenderer::Compute_SetupImage()
+{
+	m_ComputeResultTexture = new VulkanTexture2D();
+
+	return false;
+}
+
+bool vkpc::VulkanRenderer::Compute_SetupBuffers()
+{
+	return false;
+}
+
 bool vkpc::VulkanRenderer::Compute_SetupDescriptorSetLayout()
 {
 	m_ComputeDepthDescriptorSetLayout = new VulkanDescriptorSetLayout(m_Device);

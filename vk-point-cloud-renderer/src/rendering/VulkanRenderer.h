@@ -3,8 +3,6 @@
 #include <vector>
 #include "core/SubSystem.h"
 
-
-
 namespace vkpc {
 
 	class VulkanRenderer : public SubSystem {
@@ -39,6 +37,8 @@ namespace vkpc {
 		void DismantleGraphics();
 
 		bool SetupCompute();
+		bool Compute_SetupImage();
+		bool Compute_SetupBuffers();
 		bool Compute_SetupDescriptorSetLayout();
 		bool Compute_SetupDescriptorSets();
 		bool Compute_SetupShaders();
@@ -79,7 +79,7 @@ namespace vkpc {
 		*/
 		class VulkanCommandPool* m_ComputeCommandPool;
 		std::vector<class VulkanCommandBuffer*> m_ComputeCommandBuffers; //still one for each swapchain frame.
-		class VulkanTexture* m_ComputeResultTexture;
+		class VulkanTexture2D* m_ComputeResultTexture;
 
 		class VulkanBuffer* m_ComputeTransformUBO;
 

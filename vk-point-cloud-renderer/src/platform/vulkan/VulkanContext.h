@@ -62,6 +62,7 @@ namespace vkpc {
 		
 	private:
 		static bool m_ValidationEnabled;
+		static bool m_SamplerAnisotropy;
 		static std::vector<const char*> m_ValidationLayers;
 		static std::vector<const char*> m_Extensions;
 		static std::vector<const char*> m_DeviceExtensions;

@@ -43,9 +43,17 @@ namespace vkpc {
 		//Find swap chain support details.
 		static SwapChainSupportDetails FindSwapChainSupportDetails(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 
+		VkPhysicalDeviceFeatures GetDeviceFeatures() const;
+		VkPhysicalDeviceProperties GetDeviceProperties() const;
+		VkPhysicalDeviceMemoryProperties GetDeviceMemoryProperties() const;
+
+
 	private:
 		void CacheQueueFamilyIndicies();
 		void CacheMemoryProperties();
+		void CacheDeviceProperties();
+		void CacheDeviceFeatures();
+
 		bool GetValidDepthFormat();
 
 		bool CreateLogicalDevice();
@@ -75,5 +83,7 @@ namespace vkpc {
 
 		QueueFamilyIndices m_QueueFamilyIndices;
 		VkPhysicalDeviceMemoryProperties m_CachedMemoryProperties;
+		VkPhysicalDeviceProperties m_CachedDeviceProperties;
+		VkPhysicalDeviceFeatures m_CachedDeviceFeatures;
 	};
 }

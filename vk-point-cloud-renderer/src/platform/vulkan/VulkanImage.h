@@ -33,6 +33,9 @@ namespace vkpc {
 
 		bool Construct();
 
+		void Allocate(VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		void FillImage(void* data, VkDeviceSize size);
+
 	private:
 		bool CreateImage();
 		void DestroyImage();

@@ -22,25 +22,45 @@ VkDescriptorBufferInfo vkpc::VulkanBuffer::GetDescriptorInfo()
 	return m_DescriptorInfo;
 }
 
+void vkpc::VulkanBuffer::SetFlags(VkBufferCreateFlags flags)
+{
+	m_Flags = flags;
+}
+
+void vkpc::VulkanBuffer::SetSize(VkDeviceSize size)
+{
+	m_Size = size;
+}
+
+void vkpc::VulkanBuffer::SetUsage(VkBufferUsageFlags usage)
+{
+	m_Usage = usage;
+}
+
+void vkpc::VulkanBuffer::SetSharingMode(VkSharingMode sharingMode)
+{
+	m_SharingMode = sharingMode;
+}
+
 bool vkpc::VulkanBuffer::Construct()
 {
-	return false;
+	return CreateBuffer();
 }
 
 void vkpc::VulkanBuffer::Demolish(bool freeMemory)
 {
+	DestroyBuffer(freeMemory);
 }
 
-bool vkpc::VulkanBuffer::FillBuffer(void* block, size_t size, VkMemoryPropertyFlags properties)
+void vkpc::VulkanBuffer::Allocate(VkMemoryPropertyFlags properties)
 {
-	VKPC_ASSERT(size == m_Size);
-	VKPC_ASSERT(IsValid());
+	AllocateMemory(properties);
+}
 
-	if (!AllocateMemory(properties))
-	{
-		VKPC_LOG_ERROR("Failed to allocate memory to buffer!");
-		return false;
-	}
+bool vkpc::VulkanBuffer::FillBuffer(void* block)
+{
+	VKPC_ASSERT(m_Size > 0);
+	VKPC_ASSERT(IsValid()); 
 
 	if (vkBindBufferMemory(m_OwningDevice->GetLogicalDevice(), m_Buffer, m_DeviceMemory, 0) != VK_SUCCESS)
 	{
@@ -50,8 +70,11 @@ bool vkpc::VulkanBuffer::FillBuffer(void* block, size_t size, VkMemoryPropertyFl
 
 	void* data;
 	vkMapMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory, 0, m_Size, 0, &data);
-	memcpy(data, block, size);
+	memcpy(data, block, m_Size);
 	vkUnmapMemory(m_OwningDevice->GetLogicalDevice(), m_DeviceMemory);
+
+	//Mark the resource as currently active (so that the device can clean up the memory when its cleaned up).
+	m_IsActive = true;
 
 	return true;
 }
@@ -72,9 +95,6 @@ bool vkpc::VulkanBuffer::CreateBuffer()
 		m_IsValid = false;
 		return false;
 	}
-
-	//Mark the resource as currently active (so that the device can clean up the memory when its cleaned up).
-	m_IsActive = true;
 
 	return true;
 }
@@ -104,6 +124,7 @@ bool vkpc::VulkanBuffer::AllocateMemory(VkMemoryPropertyFlags properties)
 
 	if (vkAllocateMemory(m_OwningDevice->GetLogicalDevice(), &allocInfo, nullptr, &m_DeviceMemory) != VK_SUCCESS) {
 		VKPC_LOG_ERROR("Failed to allocate buffer memory!");
+		m_IsValid = false;
 		return false;
 	}
 

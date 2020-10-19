@@ -95,6 +95,15 @@ bool vkpc::VulkanImage::Construct()
 	return CreateImage();
 }
 
+void vkpc::VulkanImage::Allocate(VkMemoryPropertyFlags properties)
+{
+	AllocateMemory(properties);
+}
+
+void vkpc::VulkanImage::FillImage(void* data, VkDeviceSize size)
+{
+}
+
 bool vkpc::VulkanImage::CreateImage()
 {
 	VkImageCreateInfo createInfo = {};
@@ -119,6 +128,24 @@ bool vkpc::VulkanImage::CreateImage()
 		return false;
 	}
 
+	return true;
+}
+
+void vkpc::VulkanImage::DestroyImage()
+{
+	if (m_Image != VK_NULL_HANDLE)
+	{
+		vkDestroyImage(m_OwningDevice->GetLogicalDevice(), m_Image, nullptr);
+
+		vkFreeMemory(m_OwningDevice->GetLogicalDevice(), m_ImageDeviceMemory, nullptr);
+
+		m_Image = VK_NULL_HANDLE;
+	}
+
+}
+
+bool vkpc::VulkanImage::AllocateMemory(VkMemoryPropertyFlags properties)
+{
 	VkMemoryRequirements memReqs{};
 	vkGetImageMemoryRequirements(m_OwningDevice->GetLogicalDevice(), m_Image, &memReqs);
 
@@ -136,19 +163,8 @@ bool vkpc::VulkanImage::CreateImage()
 		m_IsValid = false;
 		return false;
 	}
-
-	return true;
 }
 
-void vkpc::VulkanImage::DestroyImage()
+void vkpc::VulkanImage::FreeMemory()
 {
-	if (m_Image != VK_NULL_HANDLE)
-	{
-		vkDestroyImage(m_OwningDevice->GetLogicalDevice(), m_Image, nullptr);
-
-		vkFreeMemory(m_OwningDevice->GetLogicalDevice(), m_ImageDeviceMemory, nullptr);
-
-		m_Image = VK_NULL_HANDLE;
-	}
-
 }

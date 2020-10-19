@@ -8,6 +8,8 @@ vkpc::VulkanDevice::VulkanDevice(VkPhysicalDevice physicalDevice)
 {
 	CacheQueueFamilyIndicies();
 	CacheMemoryProperties();
+	CacheDeviceProperties();
+	CacheDeviceFeatures();
 
 	if (!CreateLogicalDevice())
 	{
@@ -202,6 +204,21 @@ vkpc::SwapChainSupportDetails vkpc::VulkanDevice::FindSwapChainSupportDetails(Vk
 	return details;
 }
 
+VkPhysicalDeviceFeatures vkpc::VulkanDevice::GetDeviceFeatures() const
+{
+	return m_CachedDeviceFeatures;
+}
+
+VkPhysicalDeviceProperties vkpc::VulkanDevice::GetDeviceProperties() const
+{
+	return m_CachedDeviceProperties;
+}
+
+VkPhysicalDeviceMemoryProperties vkpc::VulkanDevice::GetDeviceMemoryProperties() const
+{
+	return m_CachedMemoryProperties;
+}
+
 void vkpc::VulkanDevice::CacheQueueFamilyIndicies()
 {
 	VulkanSurface* surface = VulkanContext::GetSurface();
@@ -211,6 +228,16 @@ void vkpc::VulkanDevice::CacheQueueFamilyIndicies()
 void vkpc::VulkanDevice::CacheMemoryProperties()
 {
 	vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &m_CachedMemoryProperties);
+}
+
+void vkpc::VulkanDevice::CacheDeviceProperties()
+{
+	vkGetPhysicalDeviceProperties(GetPhysicalDevice(), &m_CachedDeviceProperties);	
+}
+
+void vkpc::VulkanDevice::CacheDeviceFeatures()
+{
+	vkGetPhysicalDeviceFeatures(GetPhysicalDevice(), &m_CachedDeviceFeatures);
 }
 
 bool vkpc::VulkanDevice::GetValidDepthFormat()

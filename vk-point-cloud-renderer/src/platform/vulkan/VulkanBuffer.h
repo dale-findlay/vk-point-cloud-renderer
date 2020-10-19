@@ -14,10 +14,16 @@ namespace vkpc {
 		VkBuffer GetVkBuffer();
 		VkDescriptorBufferInfo GetDescriptorInfo();
 
+		void SetFlags(VkBufferCreateFlags flags);
+		void SetSize(VkDeviceSize size);
+		void SetUsage(VkBufferUsageFlags usage);
+		void SetSharingMode(VkSharingMode sharingMode);
+
 		bool Construct();
 		void Demolish(bool freeMemory = true);
 
-		bool FillBuffer(void* block, size_t size, VkMemoryPropertyFlags properties);
+		void Allocate(VkMemoryPropertyFlags properties);
+		bool FillBuffer(void* block);
 
 	private:
 		bool CreateBuffer();

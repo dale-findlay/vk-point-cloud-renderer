@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 
+#include <vulkan/vulkan.h>
+#include "core/CoreTypes.h"
 #include "platform/vulkan/core/VulkanDeviceResource.h"
 
 namespace vkpc {
@@ -9,31 +10,49 @@ namespace vkpc {
 	{
 	protected:
 		VulkanTexture(class VulkanDevice* device);
-		~VulkanTexture();
+		virtual ~VulkanTexture();
 
 		virtual bool CreateImage() = 0;
 		virtual bool CreateImageView() = 0;
 		virtual bool CreateSampler() = 0;
 
+		/*
+			Don't need implementors to handle destroy, 
+			it should be as simple as calling delete on the abstractions. 
+		*/
 		virtual void DestroyImage();
 		virtual void DestroySampler();
 		virtual void DestroyImageView();
 
 	public:
-		VkImageLayout GetImageLayout();
-
 		class VulkanImage* GetImage();
-		class VulkanImageView GetImageView();
+		class VulkanImageView* GetImageView();
 		class VulkanSampler* GetSampler();
 
-	private:
+		uint32 GetWidth() const;
+		void SetWidth(uint32 width);
+		
+		uint32 GetHeight() const;
+		void SetHeight(uint32 height);
+		
+		uint32 GetMipLevels() const;
+		void SetMipLevels(uint32 mipLevels);
+
+		uint32 GetLayerCount() const;
+		void SetLayerCount(uint32 layerCount);
+		
+		VkImageLayout GetImageLayout() const;
+		void SetImageLayout(VkImageLayout imageLayout);
+
+	protected:
 		class VulkanDevice* m_OwningDevice;
 		
 		class VulkanImage* m_Image;
-		class VulkanImageView* m_View;
+		class VulkanImageView* m_ImageView;
 		class VulkanSampler* m_Sampler;
 
 		VkImageLayout m_ImageLayout;
+		VkImageUsageFlags m_ImageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
 
 		uint32_t m_Width;
 		uint32_t m_Height;
