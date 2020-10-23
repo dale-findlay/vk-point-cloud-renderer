@@ -40,6 +40,21 @@ void vkpc::VulkanTexture::SetImageLayout(VkImageLayout imageLayout)
 	m_ImageLayout = imageLayout;
 }
 
+VkFormat vkpc::VulkanTexture::GetFormat() const
+{
+	return m_Format;
+}
+
+void vkpc::VulkanTexture::SetFormat(VkFormat format)
+{
+	m_Format = format;
+}
+
+bool vkpc::VulkanTexture::Construct()
+{
+	return false;
+}
+
 uint32 vkpc::VulkanTexture::GetWidth() const
 {
 	return m_Width;

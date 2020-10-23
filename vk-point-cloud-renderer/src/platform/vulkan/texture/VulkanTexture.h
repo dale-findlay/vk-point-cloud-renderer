@@ -24,6 +24,7 @@ namespace vkpc {
 		virtual void DestroySampler();
 		virtual void DestroyImageView();
 
+
 	public:
 		class VulkanImage* GetImage();
 		class VulkanImageView* GetImageView();
@@ -44,6 +45,11 @@ namespace vkpc {
 		VkImageLayout GetImageLayout() const;
 		void SetImageLayout(VkImageLayout imageLayout);
 
+		VkFormat GetFormat() const;
+		void SetFormat(VkFormat format);
+
+		bool Construct();
+
 	protected:
 		class VulkanDevice* m_OwningDevice;
 		
@@ -51,6 +57,7 @@ namespace vkpc {
 		class VulkanImageView* m_ImageView;
 		class VulkanSampler* m_Sampler;
 
+		VkFormat m_Format;
 		VkImageLayout m_ImageLayout;
 		VkImageUsageFlags m_ImageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
 
@@ -58,6 +65,5 @@ namespace vkpc {
 		uint32_t m_Height;
 		uint32_t m_MipLevels;
 		uint32_t m_LayerCount;
-
 	};
 }
